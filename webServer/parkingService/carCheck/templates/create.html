@@ -1,0 +1,320 @@
+<style>
+  html {
+    height: 100%;
+    background-repeat: no-repeat;
+    background-image: linear-gradient(rgb(10, 46, 82), rgb(13, 71, 161));
+  }
+
+  .card-container.card {
+    max-width: 350px;
+    padding: 40px 40px;
+  }
+
+  .btn {
+    font-weight: 700;
+    height: 36px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+
+  }
+
+  .card {
+    background-color: #F7F7F7;
+    padding: 20px 25px 30px;
+    margin: 0 auto 25px;
+    margin-top: 50px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .profile-img-card {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 10px;
+    display: block;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+  }
+
+  .profile-name-card {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0 0;
+    min-height: 1em;
+  }
+
+  .reauth-email {
+    display: block;
+    color: #404040;
+    line-height: 2;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  .form-accountCreate #inputEmail,
+  .form-accountCreate #username,
+  .form-accountCreate #verifyPassword,
+  .form-accountCreate #email,
+  .form-accountCreate #password {
+    direction: ltr;
+    height: 20px;
+    font-size: 16px;
+  }
+
+  .form-accountCreate input[type=email],
+  .form-accountCreate input[type=password],
+  .form-accountCreate input[type=text],
+  .form-accountCreate button {
+    width: 100%;
+    display: block;
+    margin-bottom: 10px;
+    z-index: 1;
+    position: relative;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  .form-accountCreate .form-control:focus {
+    border-color: rgb(104, 145, 162);
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgb(104, 145, 162);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgb(104, 145, 162);
+  }
+
+  .btn.btn-signin {
+    background-color: rgb(13, 71, 161);
+    padding: 0px;
+    font-weight: 700;
+    font-size: 14px;
+    height: 36px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    border: none;
+    -o-transition: all 0.218s;
+    -moz-transition: all 0.218s;
+    -webkit-transition: all 0.218s;
+    transition: all 0.218s;
+  }
+
+  .btn.btn-signin:hover,
+  .btn.btn-signin:active,
+  .btn.btn-signin:focus {
+    background-color: rgb(93, 93, 93);
+  }
+
+
+  .help-block {
+    background-color: rgb(255, 0, 0);
+    color: rgb(255, 255, 255);
+    border-radius: 3px;
+    margin-bottom: 10px;
+
+  }
+</style>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<script>
+//I'm sorry for this, I wasn't sure how else to check for common passwords
+var commonPassword = Array("123456","password","12345678","1234","pussy","12345","dragon","qwerty","696969","mustang","letmein","baseball","master","michael","football","shadow","monkey","abc123","pass","6969","jordan","harley","ranger","iwantu","jennifer","hunter","2000","test","batman","trustno1","thomas","tigger","robert","access","love","buster","1234567","soccer","hockey","killer","george","sexy","andrew","charlie","superman","asshole","dallas","jessica","panties","pepper","1111","austin","william","daniel","golfer","summer","heather","hammer","yankees","joshua","maggie","biteme","enter","ashley","thunder","cowboy","silver","richard","orange","merlin","michelle","corvette","bigdog","cheese","matthew","121212","patrick","martin","freedom","ginger","blowjob","nicole","sparky","yellow","camaro","secret","dick","falcon","taylor","111111","131313","123123","bitch","hello","scooter","please","","porsche","guitar","chelsea","black","diamond","nascar","jackson","cameron","654321","computer","amanda","wizard","xxxxxxxx","money","phoenix","mickey","bailey","knight","iceman","tigers","purple","andrea","horny","dakota","aaaaaa","player","sunshine","morgan","starwars","boomer","cowboys","edward","charles","girls","booboo","coffee","xxxxxx","bulldog","ncc1701","rabbit","peanut","john","johnny","gandalf","spanky","winter","brandy","compaq","carlos","tennis","james","mike","brandon","fender","anthony","blowme","ferrari","cookie","chicken","maverick","chicago","joseph","diablo","sexsex","hardcore","666666","willie","welcome","chris","panther","yamaha","justin","banana","driver","marine","angels","fishing","david","maddog","hooters","wilson","butthead","dennis","captain","bigdick","chester","smokey","xavier","steven","viking","snoopy","blue","eagles","winner","samantha","house","miller","flower","jack","firebird","butter","united","turtle","steelers","tiffany","zxcvbn","tomcat","golf","bond007","bear","tiger","doctor","gateway","gators","angel","junior","thx1138","porno","badboy","debbie","spider","melissa","booger","1212","flyers","fish","porn","matrix","teens","scooby","jason","walter","cumshot","boston","braves","yankee","lover","barney","victor","tucker","princess","mercedes","5150","doggie","zzzzzz","gunner","horney","bubba","2112","fred","johnson","xxxxx","tits","member","boobs","donald","bigdaddy","bronco","penis","voyager","rangers","birdie","trouble","white","topgun","bigtits","bitches","green","super","qazwsx","magic","lakers","rachel","slayer","scott","2222","asdf","video","london","7777","marlboro","srinivas","internet","action","carter","jasper","monster","teresa","jeremy","11111111","bill","crystal","peter","pussies","cock","beer","rocket","theman","oliver","prince","beach","amateur","7777777","muffin","redsox","star","testing","shannon","murphy","frank","hannah","dave","eagle1","11111","mother","nathan","raiders","steve","forever","angela","viper","ou812","jake","lovers","suckit","gregory","buddy","whatever","young","nicholas","lucky","helpme","jackie","monica","midnight","college","baby","brian","mark","startrek","sierra","leather","232323","4444","beavis","bigcock","happy","sophie","ladies","naughty","giants","booty","blonde","golden","0","fire","sandra","pookie","packers","einstein","dolphins","0","chevy","winston","warrior","sammy","slut","8675309","zxcvbnm","nipples","power","victoria","asdfgh","vagina","toyota","travis","hotdog","paris","rock","xxxx","extreme","redskins","erotic","dirty","ford","freddy","arsenal","access14","wolf","nipple","iloveyou","alex","florida","eric","legend","movie","success","rosebud","jaguar","great","cool","cooper","1313","scorpio","mountain","madison","987654","brazil","lauren","japan","naked","squirt","stars","apple","alexis","aaaa","bonnie","peaches","jasmine","kevin","matt","qwertyui","danielle","beaver","4321","4128","runner","swimming","dolphin","gordon","casper","stupid","shit","saturn","gemini","apples","august","3333","canada","blazer","cumming","hunting","kitty","rainbow","112233","arthur","cream","calvin","shaved","surfer","samson","kelly","paul","mine","king","racing","5555","eagle","hentai","newyork","little","redwings","smith","sticky","cocacola","animal","broncos","private","skippy","marvin","blondes","enjoy","girl","apollo","parker","qwert","time","sydney","women","voodoo","magnum","juice","abgrtyu","777777","dreams","maxwell","music","rush2112","russia","scorpion","rebecca","tester","mistress","phantom","billy","6666","albert");
+
+
+
+function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = jQuery.trim(cookies[i]);
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
+function csrfSafeMethod(method) {
+  // these HTTP methods do not require CSRF protection
+  return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+  beforeSend: function(xhr, settings) {
+    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    }
+  }
+});
+
+  $(document).ready(function() {
+    loadProfile();
+
+    $('#submit').on('click', function(e) {
+      let noErrors = true;
+      let form = $('#createaccount-form');
+      let data = {};
+      form.find('.form-group').each(function() {
+        let input = $(this).find(':input');
+        if (input.val() === '') {
+          noErrors = false;
+          if (!$(this).hasClass('has-error')) {
+            $(this).addClass('has-error');
+            input.after('<span class="help-block">This field cannot be blank.</span>');
+          }
+
+        } else if ($(this).data('label') == 'email' && !(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input.val())))  {
+          noErrors = false;
+          if (!$(this).hasClass('has-error')) {
+            $(this).addClass('has-error');
+            input.after("<span class='help-block'>Email is invalid.</span>");
+          }
+
+        }else if ($(this).data('label') == 'password' && (input.val().length < 6)){
+          noErrors = false;
+          if (!$(this).hasClass('has-error')) {
+            $(this).addClass('has-error');
+            input.after("<span class='help-block'>Password needs to be at least 6 characters long.</span>");
+          }
+
+        }else if ($(this).data('label') == 'password' && -1 != $.inArray(input.val(), commonPassword)){
+          noErrors = false;
+          if (!$(this).hasClass('has-error')) {
+            $(this).addClass('has-error');
+            input.after("<span class='help-block'>Given password is too common.</span>");
+          }
+        }else if ($(this).data('label') == 'verifyPassword' && input.val() != data['password'] && noErrors) {
+          noErrors = false;
+          if (!$(this).hasClass('has-error')) {
+            $(this).addClass('has-error');
+            input.after("<span class='help-block'>Password doesn't match.</span>");
+          }
+        }
+
+        else if ($(this).data('label') == 'username' && (input.val().length < 3 || input.val().length > 30 || {{ usernames|safe }}.includes(input.val()) || !(/^[a-zA-Z0-9]+$/.test(input.val())))){
+          noErrors = false;
+          if (!$(this).hasClass('has-error')) {
+            $(this).addClass('has-error');
+            if (!(/^[a-zA-Z0-9]+$/.test(input.val()))){
+            input.after("<span class='help-block'>Username can only be letters and/or numbers</span>");
+          }else if (input.val().length < 3 || input.val().length > 15){
+            input.after("<span class='help-block'>Username needs to be at least 3 characters long and no longer than 30. </span>");
+          }else{
+            input.after("<span class='help-block'>Username already exists</span>");
+          }
+          }
+        }else {
+          console.log('got here');
+            if ($(this).hasClass('has-error')) {
+                $(this).removeClass('has-error');
+                $(this).remove('.help-block');
+            }
+        }
+
+        if (noErrors && $(this).data('label') != "verifyPassword") {
+          data[$(this).data('label')] = input.val();
+        }
+      });
+
+      if (noErrors) {
+        $.ajax({
+          url: $(this).data('url'),
+          data: data,
+          type: 'POST',
+          success: function(result) {
+            location.href = "/"
+          },
+        });
+      }
+    });
+
+  });
+
+  function getLocalProfile(callback) {
+    var profileImgSrc = localStorage.getItem("PROFILE_IMG_SRC");
+    var profileName = localStorage.getItem("PROFILE_NAME");
+    var profileReAuthEmail = localStorage.getItem("PROFILE_REAUTH_EMAIL");
+
+    if (profileName !== null &&
+      profileReAuthEmail !== null &&
+      profileImgSrc !== null) {
+      callback(profileImgSrc, profileName, profileReAuthEmail);
+    }
+  }
+
+  function loadProfile() {
+    if (!supportsHTML5Storage()) {
+      return false;
+    }
+    getLocalProfile(function(profileImgSrc, profileName, profileReAuthEmail) {
+      $("#profile-img").attr("src", profileImgSrc);
+      $("#profile-name").html(profileName);
+      $("#reauth-email").html(profileReAuthEmail);
+      $("#inputEmail").hide();
+      $("#remember").hide();
+    });
+  }
+
+  function supportsHTML5Storage() {
+    try {
+      return 'localStorage' in window && window['localStorage'] !== null;
+    } catch (e) {
+      return false;
+    }
+  }
+</script>
+<div class="container">
+  <div class="card card-container">
+    <!-- <h3>Create an Account</h3> -->
+    <img id="profile-img" class="profile-img-card" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
+    <p id="profile-name" class="profile-name-card"></p>
+
+    <form class="form-accountCreate" method="post" id="createaccount-form">
+      <div class="form-group" data-label="username">
+        <label>Username:</label>
+        <input type="text" id="username" class="form-control"  placeholder="Username"  maxlength="30" required autofocus>
+      </div>
+      <div class="form-group" data-label="password">
+        <label>Password:</label>
+        <input type="password" id="password" class="form-control"  placeholder="Password"  maxlength="30" required>
+      </div>
+      <div class="form-group" data-label="verifyPassword">
+        <label>Password (again):</label>
+        <input type="password" id="verifyPassword" class="form-control" placeholder="Verify Password"  maxlength="30" required>
+      </div>
+      <div class="form-group" data-label="email">
+        <label>Email:</label>
+        <input type="email" id="email" class="form-control" placeholder="Email"  maxlength="254" required autofocus>
+      </div>
+      {% csrf_token %}
+    </form>
+    <button class="btn btn-lg btn-primary btn-block btn-signin" id="submit"> Create Account </button>
+    <!-- /form -->
+    <!-- <a href="#" class="forgot-password">
+            Forgot the password?
+        </a> -->
+    <button class="btn btn-md" onclick="goBack()">Go Back</button>
+    <script>
+      function goBack() {
+        window.history.back();
+      }
+    </script>
+  </div>
+</div>
