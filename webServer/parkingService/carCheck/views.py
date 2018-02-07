@@ -72,3 +72,7 @@ def createAccount(request):
             login(request, User.objects.get(username = request.POST.get('username')))
             return HttpResponseRedirect('/')
     return render(request, 'create.html', {'usernames': list(User.objects.all().values_list('username', flat=True))})
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect('/')
