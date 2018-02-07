@@ -208,7 +208,7 @@ $.ajaxSetup({
           }
         }
 
-        else if ($(this).data('label') == 'username' && (input.val().length < 3 || input.val().length > 30 || {{ usernames|safe }}.includes(input.val()) || !(/^[a-zA-Z0-9]+$/.test(input.val())))){
+        else if ($(this).data('label') == 'username' && (input.val().length < 3 || input.val().length > 30 || !(/^[a-zA-Z0-9]+$/.test(input.val())))){
           noErrors = false;
           if (!$(this).hasClass('has-error')) {
             $(this).addClass('has-error');

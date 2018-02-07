@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseNotFound
 from django.shortcuts import render, render_to_response, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
@@ -23,29 +26,9 @@ import base64
 import time
 import json
 
-
+# Create your views here.
 def index(request):
     return render(request, "index.html")
-
-@csrf_exempt
-def check(request):
-    # fs = FileSystemStorage()
-    # values = {}
-    # for newImage in request.FILES:
-    #     newImageObject = image.objects.create(photo = request.FILES[newImage])
-    #     im = Image.open(request.FILES[newImage]).convert('RGB')
-    #     im = im.resize((227, 227), Image.BILINEAR)
-    #     img_tensor = [np.asarray(im, dtype=np.float32)]
-    #     scores = sess.run(class_scores, {x_input: img_tensor, keep_prob: 1.}).tolist()
-    #     filename = request.FILES[newImage].name
-    #     newImageObject.positiveCertainty = scores[0][0]
-    #     newImageObject.negativeCertainty = scores[0][1]
-    #     newImageObject.certainty = max(min(((scores[0][0]-scores[0][1])/4),1),-1)
-    #     newImageObject.save()
-    #     print({"photo":newImageObject.photo, "positive":newImageObject.positiveCertainty, "negative":newImageObject.negativeCertainty})
-    #     values[filename] = {"positive":newImageObject.positiveCertainty, "negative":newImageObject.negativeCertainty, "certainty":newImageObject.certainty}
-    return JsonResponse(values)
-
 
 def login(request):
     if request.method == "POST":
@@ -69,7 +52,7 @@ def createAccount(request):
             loginUser = user.save()
             userLogin = authenticate(
                 username=request.POST.get('username'), password=request.POST.get('password'))
-            login(request, User.objects.get(username = request.POST.get('username')))
+            auth_login(request, User.objects.get(username = request.POST.get('username')))
             return HttpResponseRedirect('/')
     return render(request, 'create.html', {'usernames': list(User.objects.all().values_list('username', flat=True))})
 
