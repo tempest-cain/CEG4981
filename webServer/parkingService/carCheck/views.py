@@ -20,10 +20,10 @@ from carCheck .forms import *
 # import tensorflow as tf
 # from PIL import Image
 from .models import *
-import numpy as np
-import datetime
-import base64
-import time
+# import numpy as np
+# import datetime
+# import base64
+# import time
 import json
 
 # Create your views here.
@@ -59,3 +59,10 @@ def createAccount(request):
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect('/')
+
+
+def parking(request):
+    return render(request, "parking.html")
+
+def ticket(request):
+    return render(request, "tickets.html")

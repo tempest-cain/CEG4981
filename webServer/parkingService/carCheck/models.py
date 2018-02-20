@@ -4,14 +4,14 @@ from __future__ import unicode_literals
 from django.db import models
 
 class parking_pass(models.Model):
-    pass_number = models.IntegerField( unique=True)
+    pass_number = models.IntegerField(unique=True)
     expiration = models.CharField(max_length=30)
     owner = models.CharField(max_length=300) #would be student ID in real applicatoin
 
 class car(models.Model):
     model = models.CharField(max_length = 100)
     brand = models.CharField(max_length = 100)
-    licence_plate = models.CharField(max_length=12)
+    licence_plate = models.CharField(max_length=12, unique=True)
     color = models.CharField(max_length = 30)
     parking_pass = models.ForeignKey(parking_pass)
 
