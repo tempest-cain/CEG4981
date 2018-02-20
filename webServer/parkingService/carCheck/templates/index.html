@@ -5,14 +5,28 @@
 <div class="container">
   {% if user.is_authenticated %}
     <h3>Welcome <b>{{ user }}</b>.</h3>
+    <div class="row">
+      <div class=" col s4">
     <a href="/logout" class="waves-effect waves-light btn">logout</a>
+  </div>
+  </div>
+    <div class="row">
+      <div class=" col s4">
+    <a href="/parking" class="waves-effect waves-light btn">Parking</a>
+    <a href="/ticket" class="waves-effect waves-light btn">Tickets</a>
+    </div>
+    </div>
 {% else %}
     <h3>Welcome, new user. <b>Please log in.
       <!-- <i>or else! </i> -->
     </b>
       <!-- <img src="http://emojipedia-us.s3.amazonaws.com/cache/21/d4/21d48480587b92d8d37ac259f06c444c.png" height = "24" width = "24"> -->
     </h3>
+
+    <div class="row">
+      <div class=" col s4">
+      <a href="/login" class="waves-effect waves-light btn">FOR THE LOVE OF GOD YOU BETTER LOGIN</a>
+    </div>
+    </div>
 {% endif %}
 <p>This is the homepage for now</p>
-
-<a href="/login" class="waves-effect waves-light btn">FOR THE LOVE OF GOD YOU BETTER LOGIN</a>
