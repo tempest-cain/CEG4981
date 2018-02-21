@@ -1,7 +1,23 @@
 {% load static %}
 <link rel="stylesheet" href="{%static 'materialize/css/materialize.min.css'%}">
 <script src="{%static 'materilize/js/materialize.min.js'%}"></script>
-
+<script>
+function submitPhoto(){
+  var item = document.getElementById('file').files[0];
+  // todo check file extension
+  var data = {file:item;
+  console.log(data);
+  $.ajax({
+      url: '% url 'upload' %',
+      type: 'POST',
+      processData: false,
+      contentType: false,
+      data:data
+  }).done(function (data) {
+    console.log(data);
+  });
+}
+</script>
 <div class="container">
   {% if user.is_authenticated %}
     <h3>Welcome <b>{{ user }}</b>.</h3>
@@ -18,15 +34,24 @@
     </div>
 {% else %}
     <h3>Welcome, new user. <b>Please log in.
-      <!-- <i>or else! </i> -->
+      <i>or else! </i>
     </b>
-      <!-- <img src="http://emojipedia-us.s3.amazonaws.com/cache/21/d4/21d48480587b92d8d37ac259f06c444c.png" height = "24" width = "24"> -->
     </h3>
 
     <div class="row">
       <div class=" col s4">
-      <a href="/login" class="waves-effect waves-light btn">FOR THE LOVE OF GOD YOU BETTER LOGIN</a>
+      <a href="/login" class="waves-effect waves-light btn">~LOGIN~</a>
     </div>
     </div>
 {% endif %}
 <p>This is the homepage for now</p>
+<div id="well">
+  <form method="post" enctype="multipart/form-data">
+ {% csrf_token %}
+   <input type="file" name="myfile" id="file">
+   
+<div class="row">
+<button type="submit" class="btn">Upload</button>
+</div>
+</form>
+</div>

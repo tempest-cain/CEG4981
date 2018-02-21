@@ -2,3 +2,5 @@
 webServer/venv/
 
 venv/
+
+*.pyc
