@@ -1,22 +1,31 @@
 {% load static %}
 <link rel="stylesheet" href="{%static 'materialize/css/materialize.min.css'%}">
 <script src="{%static 'materilize/js/materialize.min.js'%}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
-function submitPhoto(){
-  var item = document.getElementById('file').files[0];
-  // todo check file extension
-  var data = {file:item;
+var form = document.getElementById('file-form');
+form.onsubmit = function(event) {
+event.preventDefault();
+var item = document.getElementById('file').files[0];
+// todo check file extension
+var data = {file:item};
+console.log(data);
+$.ajax({
+    url: '{% url 'check' %}',
+    type: 'POST',
+    processData: false,
+    contentType: false,
+    data:data
+}).done(function (data) {
+  console.log("asdf");
   console.log(data);
-  $.ajax({
-      url: '% url 'upload' %',
-      type: 'POST',
-      processData: false,
-      contentType: false,
-      data:data
-  }).done(function (data) {
-    console.log(data);
-  });
+    console.log("asdf");
+});
 }
+// function submitPhoto(event){
+//   event.preventDefault();
+//
+// }
 </script>
 <div class="container">
   {% if user.is_authenticated %}
@@ -46,12 +55,11 @@ function submitPhoto(){
 {% endif %}
 <p>This is the homepage for now</p>
 <div id="well">
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" id="file-form">
  {% csrf_token %}
-   <input type="file" name="myfile" id="file">
-   
-<div class="row">
-<button type="submit" class="btn">Upload</button>
-</div>
+   <input type="file" name="myfile" id="file" class="form-control-file">
+   <div class="row">
+     <button onclick="submitPhoto()" class="btn">Upload</button>
+   </div>
 </form>
 </div>

@@ -27,6 +27,6 @@ urlpatterns = [
     url(r'^createaccount/', createAccount),
     url(r'^parking/', parking),
     url(r'^ticket/', ticket),
-    # url(r'^check/', check),
+    url(r'^check/', check, name="check"),
     # url(r'^control/', control),
 ]

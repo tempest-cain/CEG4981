@@ -23,12 +23,27 @@ from .models import *
 # import numpy as np
 # import datetime
 # import base64
+import requests
 # import time
 import json
 
 # Create your views here.
 def index(request):
+    print(request.FILES)
     return render(request, "index.html")
+
+@csrf_exempt
+def check(request):
+    URL = "https://api.openalpr.com/v2/recognize"
+    print(request.FILES)
+    PARAMS = { 'image':request.FILES,
+            'secret_key':"sk_fd494c5574d66d4278ce39fe",
+            'country':"us",
+            }
+    print(PARAMS)
+    r = requests.get(url = URL, params = PARAMS)
+    print(r.json())
+    return JsonResponse(r.json())
 
 def login(request):
     if request.method == "POST":
