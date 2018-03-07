@@ -17,23 +17,16 @@
         </thead>
 
         <tbody class="white-text">
-          {% for lot in lots %}
+          {% for ticket in tickets %}
           <tr>
             <td>{{ ticket.pk }}</td>
-            <td>{{ ticket.car }}</td>
+            <td>{{ ticket.ticketed_car }}</td>
             <td><a href="{{ ticket.photo }}">Photo</a></td>
-            <td>${{ ticket.amount}}</td>
+            <td>${{ ticket.fine_amount}}</td>
             <td>{{ ticket.date}}</td>
 
           </tr>
           {% endfor %}
-          <tr>
-            <td>2</td>
-            <td>AG3 423</td>
-            <td><a href="google.com">Photo</a></td>
-            <td>$13.45</td>
-            <td>1-3-18</td>
-          </tr>
         </tbody>
       </table>
     </div>

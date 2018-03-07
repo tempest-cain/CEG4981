@@ -15,8 +15,11 @@ class car(models.Model):
     color = models.CharField(max_length = 30)
     parking_pass = models.ForeignKey(parking_pass)
 
+    def __str__(self):
+        return '%s' % (self.licence_plate)
+
 class ticket(models.Model):
-    car = models.ForeignKey(car)
-    parking_pass = models.ForeignKey(parking_pass, blank=True)
+    ticketed_car = models.ForeignKey(car)
     fine_amount = models.DecimalField(decimal_places=2, max_digits=10)
     photo = models.FileField()
+    date=models.CharField(max_length=30)

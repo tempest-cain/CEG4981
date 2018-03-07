@@ -26,6 +26,7 @@ from .models import *
 import requests
 # import time
 import json
+from .models import *
 
 # Create your views here.
 def index(request):
@@ -78,5 +79,8 @@ def logout_view(request):
 def parking(request):
     return render(request, "parking.html")
 
-def ticket(request):
-    return render(request, "tickets.html")
+def ticketView(request):
+    data = {}
+    data['tickets']= ticket.objects.all()
+    data['cars']= car.objects.all()
+    return render(request, "tickets.html", context=data)

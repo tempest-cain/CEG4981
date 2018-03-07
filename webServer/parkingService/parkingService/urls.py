@@ -26,7 +26,7 @@ urlpatterns = [
     url(r'^logout/', logout_view),
     url(r'^createaccount/', createAccount),
     url(r'^parking/', parking),
-    url(r'^ticket/', ticket),
+    url(r'^ticket/', ticketView),
     url(r'^check/', check, name="check"),
     # url(r'^control/', control),
 ]
