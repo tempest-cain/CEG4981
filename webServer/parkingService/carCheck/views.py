@@ -84,3 +84,8 @@ def ticketView(request):
     data['tickets']= ticket.objects.all()
     data['cars']= car.objects.all()
     return render(request, "tickets.html", context=data)
+
+
+def photoview(request, pk = None):
+    # image_data = open(image.objects.get(pk=pk).photo, "rb").read()
+    return HttpResponse(image.objects.get(pk=pk).photo, content_type="image/png")

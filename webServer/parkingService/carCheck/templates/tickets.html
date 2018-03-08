@@ -21,7 +21,7 @@
           <tr>
             <td>{{ ticket.pk }}</td>
             <td>{{ ticket.ticketed_car }}</td>
-            <td><a href="{{ ticket.photo }}">Photo</a></td>
+            <td><a href="/media/{{ ticket.photo }}">Photo</a></td>
             <td>${{ ticket.fine_amount}}</td>
             <td>{{ ticket.date}}</td>
 

@@ -17,7 +17,9 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 from django.contrib import admin
 # from django.urls import path
+from django.views.static import serve
 from carCheck.views import *
+import settings
 
 urlpatterns = [
     url(r'^$', index),
@@ -28,5 +30,6 @@ urlpatterns = [
     url(r'^parking/', parking),
     url(r'^ticket/', ticketView),
     url(r'^check/', check, name="check"),
+    url(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
     # url(r'^control/', control),
 ]
