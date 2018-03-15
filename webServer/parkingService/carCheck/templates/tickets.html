@@ -1,7 +1,22 @@
 {% load static %}
 <link rel="stylesheet" href="{%static 'materialize/css/materialize.min.css'%}">
-<script src="{%static 'materilize/js/materialize.min.js'%}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<!-- <script src="{%static 'bootstarp/js/bootstrap.min.js'%}"></script> -->
+<script src="{%static 'materialize/js/materialize.min.js'%}"></script>
+<script>
+  $(function(){
+    $('.modal').modal();
+    $('.modal-trigger').click(function(){
+      $('.modal-content').html('<img src='+this.id +' class="alt="Car Image">');
+    });
+ });
+</script>
+<style>
 
+ img{
+   width: 80%;
+ }
+</style>
 <div class="row">
   <div class=" card blue-grey darken-1 col s8 offset-s2">
     <div class="card-content white-text">
@@ -21,7 +36,7 @@
           <tr>
             <td>{{ ticket.pk }}</td>
             <td>{{ ticket.ticketed_car }}</td>
-            <td><a href="/media/{{ ticket.photo }}">Photo</a></td>
+            <td><a class="waves-effect waves-light btn modal-trigger" id="/media/{{ ticket.photo }}" href="#modal1">Photo</a></td>
             <td>${{ ticket.fine_amount}}</td>
             <td>{{ ticket.date}}</td>
 
@@ -32,3 +47,13 @@
     </div>
     </div>
   </div>
+
+
+  <div id="modal1" class="modal">
+      <div class="modal-content center-align">
+
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+      </div>
+    </div>

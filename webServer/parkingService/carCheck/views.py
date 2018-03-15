@@ -35,6 +35,8 @@ def index(request):
 @csrf_exempt
 def check(request):
     URL = "https://api.openalpr.com/v2/recognize"
+    print("got here!")
+    print(request.FILES)
     for image in request.FILES:
         PARAMS = {
                 'secret_key':"sk_fd494c5574d66d4278ce39fe",
