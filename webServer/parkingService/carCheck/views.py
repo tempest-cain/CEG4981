@@ -21,12 +21,15 @@ from carCheck .forms import *
 from PIL import Image
 from .models import *
 # import numpy as np
-# import datetime
+import datetime
 # import base64
 import requests
 # import time
 import json
 from .models import *
+
+DEFAULT_FINE = 20
+
 
 # Create your views here.
 def index(request):
@@ -41,10 +44,19 @@ def check(request):
         PARAMS = {
                 'secret_key':"sk_fd494c5574d66d4278ce39fe",
                 'country':"us",
+                'recognize vehicle':1,
                 }
         files = {'image': request.FILES[image]}
         r = requests.post(url = URL, files=files, params = PARAMS)
-        return HttpResponse(r.content)
+        for car in  request.content.results:
+            plateNum = request.content.results[car].plates
+            certainty = request.content.results[car].confidence
+            region = request.content.results[car].region
+            if car.objects.get(licence_plate=plateNum) and certainty >.8:
+                checkCar = car.objects.get(licence_plate=plateNum)
+                if not checkcar.parking_pass or parking_pass.objects.get(pk=checkcar.parking_pass) <= datetime.datetime.now():
+                    image.objects.create(ticketed_car=checkCar, fine_amount=DEFAULT_FINE, photo=request.FILES[image])
+        return HttpResponse('{"123":123}')
     return JsonResponse({"Error": "No image file"})
 
 def login(request):
@@ -83,7 +95,7 @@ def parking(request):
 
 def ticketView(request):
     data = {}
-    data['tickets']= ticket.objects.all()
+    data['tickets']= ticket.objects.all().order_by('-id')
     data['cars']= car.objects.all()
     return render(request, "tickets.html", context=data)
 
