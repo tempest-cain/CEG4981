@@ -54,8 +54,13 @@ def check(request):
             region = request.content.results[car].region
             if car.objects.get(licence_plate=plateNum) and certainty >.8:
                 checkCar = car.objects.get(licence_plate=plateNum)
-                if not checkcar.parking_pass or parking_pass.objects.get(pk=checkcar.parking_pass) <= datetime.datetime.now():
+                if not checkCar:
+                    newCar = car.objects.create(model =request.content.vehicle.make_model[0].split('_')[1], brand=request.content.vehicle.make_model[0].split('_')[0], licence_plate=plateNum, color=request.content.vehicle.color[0])
                     image.objects.create(ticketed_car=checkCar, fine_amount=DEFAULT_FINE, photo=request.FILES[image])
+                elif not checkcar.parking_pass or parking_pass.objects.get(pk=checkcar.parking_pass) <= datetime.datetime.now():
+                    image.objects.create(ticketed_car=checkCar, fine_amount=DEFAULT_FINE, photo=request.FILES[image])
+
+
         return HttpResponse('{"123":123}')
     return JsonResponse({"Error": "No image file"})
 
