@@ -38,30 +38,50 @@ def index(request):
 @csrf_exempt
 def check(request):
     URL = "https://api.openalpr.com/v2/recognize"
-    print("got here!")
-    print(request.FILES)
     for image in request.FILES:
         PARAMS = {
                 'secret_key':"sk_fd494c5574d66d4278ce39fe",
                 'country':"us",
-                'recognize vehicle':1,
+                'recognize_vehicle':1,
                 }
         files = {'image': request.FILES[image]}
         r = requests.post(url = URL, files=files, params = PARAMS)
-        for car in  request.content.results:
-            plateNum = request.content.results[car].plates
-            certainty = request.content.results[car].confidence
-            region = request.content.results[car].region
-            if car.objects.get(licence_plate=plateNum) and certainty >.8:
-                checkCar = car.objects.get(licence_plate=plateNum)
-                if not checkCar:
-                    newCar = car.objects.create(model =request.content.vehicle.make_model[0].split('_')[1], brand=request.content.vehicle.make_model[0].split('_')[0], licence_plate=plateNum, color=request.content.vehicle.color[0])
-                    image.objects.create(ticketed_car=checkCar, fine_amount=DEFAULT_FINE, photo=request.FILES[image])
-                elif not checkcar.parking_pass or parking_pass.objects.get(pk=checkcar.parking_pass) <= datetime.datetime.now():
-                    image.objects.create(ticketed_car=checkCar, fine_amount=DEFAULT_FINE, photo=request.FILES[image])
+        cars = json.loads(r.content)
+        for carIndex in  range(0, len(cars['results'])):
+            checkCar = cars['results'][carIndex]
+            print(checkCar)
+            plateNum = checkCar['plate']
+            certainty = checkCar['confidence']
+            region = checkCar['region']
+            carResults = []
+            if certainty >.8:
+                # checkCar = car.objects.filter(licence_plate=plateNum)
+                action = 'valid'
+                if not car.objects.filter(licence_plate=plateNum):
 
 
-        return HttpResponse('{"123":123}')
+                    # last error message:
+            #     response = wrapped_callback(request, *callback_args, **callback_kwargs)
+            #   File "A:\Documents\Gitlab\drone\CEG4981\venv\lib\site-packages\django\views\decorators\csrf.py", line 58, in wrapped_view
+            #     return view_func(*args, **kwargs)
+            #   File "A:\Documents\Gitlab\drone\CEG4981\webServer\parkingService\carCheck\views.py", line 75, in check
+            #     image.objects.create(ticketed_car=checkCar, fine_amount=DEFAULT_FINE, photo=requests.FILES[image])
+            # AttributeError: 'unicode' object has no attribute 'objects'
+            # [25/Mar/2018 17:48:43] "POST /check/ HTTP/1.1" 500 85775
+
+
+                    newCar = car.objects.create(model =checkCar['vehicle']['body_type'][0]['name']+' '+checkCar['vehicle']['year'][0]['name'], brand=checkCar['vehicle']['make'][0]['name'], licence_plate=plateNum, color=checkCar['vehicle']['color'][0]['name'])
+                    ticket.objects.create(ticketed_car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=requests.FILES[image])
+
+                    action='ticket'
+                elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now():
+                    # elif not parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum))[0].parking_pass <= datetime.datetime.now():
+                    image.objects.create(ticketed_car=checkCar, fine_amount=DEFAULT_FINE, photo=requests.FILES[image])
+                    action='ticket'
+                carResults.append([plateNum, action])
+
+
+        return JsonResponse({"results":carResults1})
     return JsonResponse({"Error": "No image file"})
 
 def login(request):

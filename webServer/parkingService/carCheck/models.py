@@ -13,7 +13,7 @@ class car(models.Model):
     brand = models.CharField(max_length = 100)
     licence_plate = models.CharField(max_length=12, unique=True)
     color = models.CharField(max_length = 30)
-    parking_pass = models.ForeignKey(parking_pass, blank=True)
+    parking_pass = models.ForeignKey(parking_pass, blank=True, null=True)
 
     def __str__(self):
         return '%s' % (self.licence_plate)
