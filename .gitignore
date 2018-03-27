@@ -4,3 +4,5 @@ webServer/venv/
 venv/
 
 *.pyc
+
+webServer/media/

@@ -1,0 +1,92 @@
+{
+  "uuid": "",
+  "data_type": "alpr_results",
+  "epoch_time": 1522012312083,
+  "processing_time": {
+    "total": 733.3130000000097,
+    "plates": 160.82101440429688,
+    "vehicles": 462.11899999997286
+  },
+  "img_height": 3000,
+  "img_width": 4000,
+  "results": [
+    {
+      "plate": "DBM6440",
+      "confidence": 94.98289489746094,
+      "region_confidence": 95,
+      "vehicle_region": {
+        "y": 372,
+        "x": 1612,
+        "height": 1194,
+        "width": 1194
+      },
+      "region": "oh",
+      "plate_index": 0,
+      "processing_time_ms": 36.85750961303711,
+      "candidates": [
+        {
+          "matches_template": 1,
+          "plate": "DBM6440",
+          "confidence": 94.98289489746094
+        },
+      ],
+      "vehicle": {
+        "orientation": [
+          {
+            "confidence": 99.91828918457031,
+            "name": "0"
+          },
+
+        ],
+        "color": [
+          {
+            "confidence": 81.84791564941406,
+            "name": "black"
+          },
+
+        ],
+        "make": [
+          {
+            "confidence": 63.979496002197266,
+            "name": "mercury"
+          },
+        ],
+        "body_type": [
+          {
+            "confidence": 98.57682800292969,
+            "name": "suv-crossover"
+          },
+        ],
+        "year": [
+          {
+            "confidence": 80.70069122314453,
+            "name": "2010-2014"
+          },
+
+        ],
+        "make_model": [
+          {
+            "confidence": 26.728824615478516,
+            "name": "skoda_yeti"
+          },
+
+        ]
+      },
+      "matches_template": 1,
+      "requested_topn": 10
+    }
+  ],
+  "credits_monthly_used": 28,
+  "version": 2,
+  "credits_monthly_total": 2000,
+  "error": false,
+  "regions_of_interest": [
+    {
+      "y": 0,
+      "x": 0,
+      "height": 3000,
+      "width": 4000
+    }
+  ],
+  "credit_cost": 2
+}
