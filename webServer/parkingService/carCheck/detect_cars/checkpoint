@@ -1,0 +1,2 @@
+model_checkpoint_path: "cars-noncars-model"
+all_model_checkpoint_paths: "cars-noncars-model"
