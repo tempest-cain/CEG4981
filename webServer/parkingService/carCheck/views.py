@@ -28,14 +28,24 @@ import requests
 import json
 from .models import *
 from detect_cars import predict
-DEFAULT_FINE = 20
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 from PIL import Image, ExifTags
-empty_slots = 0
+
+EMPTY_SLOTS = 0
+DEFAULT_FINE = 20
+
+OPEN_ALPR_URL = "https://api.openalpr.com/v2/recognize"
+OPEN_ALPR_PARAMS = {
+        'secret_key':"sk_fd494c5574d66d4278ce39fe",
+        'country':"us",
+        'recognize_vehicle':1,
+        }
+
 # Create your views here.
 def index(request):
     return render(request, "index.html")
@@ -78,25 +88,118 @@ def checkbyjohn(request):
         return JsonResponse({"results":carResults})
     return JsonResponse({"Error": "No image file"})
 
+def fix_image_rotation(image_path):
+    try:
+        image=Image.open(os.path.join(settings.MEDIA_ROOT, image_path))
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation]=='Orientation':
+                break
+        exif=dict(image._getexif().items())
+
+        if exif[orientation] == 3:
+            image=image.rotate(180, expand=True)
+        elif exif[orientation] == 6:
+            image=image.rotate(270, expand=True)
+        elif exif[orientation] == 8:
+            image=image.rotate(90, expand=True)
+        image.save(os.path.join(settings.MEDIA_ROOT, image_path))
+        image.close()
+
+    except (AttributeError, KeyError, IndexError):
+        # cases: image don't have getexif
+        pass
+
 @csrf_exempt
 def check(request):
+
+    # Assume no carResults
+    carResult = "no_car"
+
+    print ("File", request.FILES['file'].name)
+    #print ("Image", request.FILES[image])
+
+    # Store picture into media folder for access
+    data = request.FILES['file']
+    image_path = default_storage.save('detect_cars/'+request.FILES['file'].name, request.FILES['file'])
+    tmp_file = os.path.join(settings.MEDIA_ROOT, image_path)
+
+    # print (settings.MEDIA_ROOT, image_path)
+    # print ("curre_path", os.path.dirname(os.path.realpath(__file__)))
+    # print os.path.join(settings.MEDIA_ROOT, image_path)
+
+    # Use image classifier to figure out if there is a car in the image
+    carResult = predict.checkCar(request.FILES['file'].name)
+    # print carResult
+
+    # TODO (for JOHN): Increase database counter for number of slots scanned
+
+    # If there is a not a car in the image figure increase the empty slot counter:
+    if carResult == "no_car":
+        #EMPTY_SLOTS = EMPTY_SLOTS + 1
+        # TODO (for JOHN): Increase database counter for empty slots
+        return JsonResponse({"Car_result": "Empty parking slot"})
+
+    # If there is a car in the image figure out if it needs a ticket:
+    if carResult == "car":
+        fix_image_rotation(image_path)
+        files = {'image':  open(os.path.join(settings.MEDIA_ROOT, image_path))}
+        print type(files["image"])
+        r = requests.post(url = OPEN_ALPR_URL, files=files, params = OPEN_ALPR_PARAMS)
+        openalpr_cars = json.loads(r.content)
+        print openalpr_cars
+        for carIndex in range(0, len(openalpr_cars['results'])):
+            checkCar = cars['results'][carIndex]
+            plateNum = checkCar['plate']
+            certainty = checkCar['confidence']
+            region = checkCar['region']
+            carResults = []
+            if certainty >0.8:
+                # checkCar = car.objects.filter(licence_plate=plateNum)
+                action = 'valid'
+                if not car.objects.filter(licence_plate=plateNum):
+                    car.objects.create(model =checkCar['vehicle']['body_type'][0]['name']+' '+checkCar['vehicle']['year'][0]['name'], brand=checkCar['vehicle']['make'][0]['name'], licence_plate=plateNum, color=checkCar['vehicle']['color'][0]['name'])
+                    #ticket.objects.create(ticketed_car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
+
+                    action='ticket_because_plate_not_in_db'
+                elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now():
+                    # elif not parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum))[0].parking_pass <= datetime.datetime.now():
+                    #ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
+                    action='ticket_because_expired_pass_or_no_pass_but_plate_in_db'
+                carResults.append([plateNum, action])
+            print action
+            return JsonResponse({plateNum: action})
+
+        return JsonResponse({"results":carResults})
+    return JsonResponse({"Error": "No image file"})
+
+
+@csrf_exempt
+def checkbygoonmeetold(request):
     URL = "https://api.openalpr.com/v2/recognize"
+    # Assume no carResults
     carResults = "no_car"
     files_with_cars = []
     for image in request.FILES:
         print ("File", request.FILES['file'].name)
-        x = request.FILES['file'].read()
+        #x = request.FILES['file'].read()
         #exit()
         print ("Image", request.FILES[image])
         ### get the inmemory file
+
+
         data = request.FILES[image] # or self.files['image'] in your form
         path = default_storage.save('detect_cars/'+request.FILES['file'].name, request.FILES[image])
         print (settings.MEDIA_ROOT, path)
         tmp_file = os.path.join(settings.MEDIA_ROOT, path)
+
+
         print ("curre_path", os.path.dirname(os.path.realpath(__file__)))
+
+
         carResults = predict.checkCar(request.FILES['file'].name)
         print carResults
         print os.path.join(settings.MEDIA_ROOT, path)
+
         if carResults == "car":
             try:
                 image=Image.open(os.path.join(settings.MEDIA_ROOT, path))
@@ -140,16 +243,16 @@ def check(request):
                         car.objects.create(model =checkCar['vehicle']['body_type'][0]['name']+' '+checkCar['vehicle']['year'][0]['name'], brand=checkCar['vehicle']['make'][0]['name'], licence_plate=plateNum, color=checkCar['vehicle']['color'][0]['name'])
                         #ticket.objects.create(ticketed_car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
 
-                        action='ticket'
+                        action='ticket_because_plate_not_in_db'
                     elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now():
                         # elif not parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum))[0].parking_pass <= datetime.datetime.now():
                         #ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
-                        action='ticket'
+                        action='ticket_because_expired_pass_or_no_pass_but_plate_in_db'
                     carResults.append([plateNum, action])
                 print action
                 return JsonResponse({plateNum: action})
         else:
-            empty_slots = empty_slots + 1
+            EMPTY_SLOTS = EMPTY_SLOTS + 1
         return JsonResponse({"results":carResults})
     return JsonResponse({"Error": "No image file"})
 
