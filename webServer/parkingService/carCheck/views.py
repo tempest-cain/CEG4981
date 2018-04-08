@@ -67,13 +67,11 @@ def checkbyjohn(request):
 @csrf_exempt
 def check(request):
     URL = "https://api.openalpr.com/v2/recognize"
-    carResults = "no_car"
-    files_with_cars = []
-    for image in request.FILES:
-        print(request.FILES[image])
-        data = request.FILES[image]
+    if request.FILES['file']:
+        carResults = "no_car"
+        files_with_cars = []
+        data = request.FILES['file']
         path = default_storage.save('detect_cars/'+request.FILES['file'].name, request.FILES[image])
-        tmp_file = os.path.join(settings.MEDIA_ROOT, path)
         if carResults == "car" or True:
             try:
                 image=Image.open(os.path.join(settings.MEDIA_ROOT, path))
