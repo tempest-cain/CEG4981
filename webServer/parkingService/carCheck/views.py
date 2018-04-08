@@ -3,39 +3,26 @@ from __future__ import unicode_literals
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseNotFound
 from django.shortcuts import render, render_to_response, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import FileSystemStorage, default_storage
 from django.contrib.auth import authenticate, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import User, Group
-# from rest_framework.renderers import JSONRenderer
-# from rest_framework.parsers import JSONParser
+from django.core.files.base import ContentFile
 from django.template import Context, loader
-# from .serializers import EventSerializer
+from django.conf.urls.static import static
 from django.utils import timezone
 from django.conf import settings
 #from django.views import View
-import views
-from carCheck .forms import *
-# import tensorflow as tf
-from PIL import Image
-from .models import *
-# import numpy as np
-import datetime, os
-# import base64
-import requests
-# import time
-import json
-from .models import *
-from detect_cars import predict
-DEFAULT_FINE = 20
-from django.conf import settings
-from django.conf.urls.static import static
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.conf import settings
 from PIL import Image, ExifTags
-empty_slots = 0
+from carCheck .forms import *
+from .models import *
+import datetime, os
+import requests
+import views
+import json
+DEFAULT_FINE = 20
+EMPTY_SLOTS = 0
 # Create your views here.
 def index(request):
     return render(request, "index.html")
@@ -50,7 +37,6 @@ def checkbyjohn(request):
                 'recognize_vehicle':1,
                 }
         files = {'image': request.FILES[image]}
-        print type(files["image"])
         r = requests.post(url = URL, files=files, params = PARAMS)
         cars = json.loads(r.content)
         print cars
@@ -84,20 +70,11 @@ def check(request):
     carResults = "no_car"
     files_with_cars = []
     for image in request.FILES:
-        print ("File", request.FILES['file'].name)
-        x = request.FILES['file'].read()
-        #exit()
-        print ("Image", request.FILES[image])
-        ### get the inmemory file
-        data = request.FILES[image] # or self.files['image'] in your form
+        print(request.FILES[image])
+        data = request.FILES[image]
         path = default_storage.save('detect_cars/'+request.FILES['file'].name, request.FILES[image])
-        print (settings.MEDIA_ROOT, path)
         tmp_file = os.path.join(settings.MEDIA_ROOT, path)
-        print ("curre_path", os.path.dirname(os.path.realpath(__file__)))
-        carResults = predict.checkCar(request.FILES['file'].name)
-        print carResults
-        print os.path.join(settings.MEDIA_ROOT, path)
-        if carResults == "car":
+        if carResults == "car" or True:
             try:
                 image=Image.open(os.path.join(settings.MEDIA_ROOT, path))
                 for orientation in ExifTags.TAGS.keys():
@@ -122,8 +99,8 @@ def check(request):
                     'country':"us",
                     'recognize_vehicle':1,
                     }
-            files = {'image':  open(os.path.join(settings.MEDIA_ROOT, path))}
-            print type(files["image"])
+            print(image)
+            files = {'image':  data}
             r = requests.post(url = URL, files=files, params = PARAMS)
             cars = json.loads(r.content)
             print cars
@@ -138,18 +115,17 @@ def check(request):
                     action = 'valid'
                     if not car.objects.filter(licence_plate=plateNum):
                         car.objects.create(model =checkCar['vehicle']['body_type'][0]['name']+' '+checkCar['vehicle']['year'][0]['name'], brand=checkCar['vehicle']['make'][0]['name'], licence_plate=plateNum, color=checkCar['vehicle']['color'][0]['name'])
-                        #ticket.objects.create(ticketed_car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
+                        ticket.objects.create(ticketed_car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=data)
 
                         action='ticket'
                     elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now():
                         # elif not parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum))[0].parking_pass <= datetime.datetime.now():
-                        #ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
+                        ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=data)
                         action='ticket'
                     carResults.append([plateNum, action])
                 print action
                 return JsonResponse({plateNum: action})
-        else:
-            empty_slots = empty_slots + 1
+
         return JsonResponse({"results":carResults})
     return JsonResponse({"Error": "No image file"})
 
