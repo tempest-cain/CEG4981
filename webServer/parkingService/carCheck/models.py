@@ -23,3 +23,15 @@ class ticket(models.Model):
     fine_amount = models.DecimalField(decimal_places=2, max_digits=10)
     photo = models.ImageField(upload_to='./', null = True)
     date=models.DateField(auto_now=True)
+
+class parkingLot(models.Model):
+    spots_scanned = models.IntegerField()
+    spots_empty = models.IntegerField()
+
+class uncertain_photos(models.Model):
+    ticketed_car = models.CharField(max_length=10)
+    fine_amount = models.DecimalField(decimal_places=2, max_digits=10)
+    photo = models.ImageField(upload_to='./', null = True)
+    action = models.CharField(max_length=1000)
+    message = models.CharField(max_length = 1000)
+    date=models.DateField(auto_now=True)

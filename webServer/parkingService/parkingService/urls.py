@@ -29,7 +29,10 @@ urlpatterns = [
     url(r'^createaccount/', createAccount),
     url(r'^parking/', parking),
     url(r'^ticket/', ticketView),
+    url(r'^uncertain/(?P<pk>.*)$', uncertainRequest),
+    url(r'^uncertain/', uncertainView),
     url(r'^check/', check, name="check"),
+    url(r'^checkbyjohn/', checkbyjohn, name="checkbyjohn"),
     url(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
     # url(r'^control/', control),
 ]
