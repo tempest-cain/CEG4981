@@ -38,6 +38,7 @@ from PIL import Image, ExifTags
 
 EMPTY_SLOTS = 0
 DEFAULT_FINE = 20
+NUM_SLOTS_SCANNED = 0
 
 OPEN_ALPR_URL = "https://api.openalpr.com/v2/recognize"
 OPEN_ALPR_PARAMS = {
@@ -109,6 +110,70 @@ def fix_image_rotation(image_path):
         # cases: image don't have getexif
         pass
 
+def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
+    carResults_certain = []
+    carResults_not_certain = []
+    print openalpr_cars
+    if len(openalpr_cars['results']) == 0:
+        carResults_not_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "No license plate detected"})
+        return JsonResponse({"carResults_certain": carResults_certain, "carResults_not_certain" : carResults_not_certain })
+    for carIndex in range(0, len(openalpr_cars['results'])):
+        checkCar = openalpr_cars['results'][carIndex]
+        plateNum = checkCar['plate']
+        certainty = checkCar['confidence']
+        region = checkCar['region']
+
+
+        if (certainty <= 0.79 and len(carResults_certain) <= 0):
+            # Add to uncertain and update view for review_needed
+            # TODO (for JOHN): Update for review_needed
+            carResults_not_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "No license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
+
+        if certainty > 0.8:
+            # checkCar = car.objects.filter(licence_plate=plateNum)
+            # print checkCar
+            action = 'valid'
+            vehicle_model = checkCar['vehicle']['body_type'][0]['name']+ ' ' + checkCar['vehicle']['year'][0]['name']
+            vehicle_make = checkCar['vehicle']['make'][0]['name']
+            vehicle_color = checkCar['vehicle']['color'][0]['name']
+
+            # If car object is not in database:
+            if not car.objects.filter(licence_plate=plateNum):
+                # Create car object in database
+                car.objects.create(model=vehicle_model, brand=vehicle_make, licence_plate=plateNum, color=vehicle_color)
+
+                # Generate ticket because license plate is not in database
+                ticket.objects.create(ticketed_car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'])
+
+                action = 'generate_ticket_because_license_plate_is_not_in_db'
+
+                carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
+
+            elif not (car.objects.filter(licence_plate=plateNum)[0].parking_pass):
+
+                # Generate ticket because license plate is not under a parking pass
+                ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'])
+
+                action='generate_ticket_because_license_plate_is_not_registered_under_a_parking_pass'
+
+                carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
+
+            elif not (parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now()):
+
+                # Generate ticket because license plate is under an expired pass
+                ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'])
+
+                action='generate_ticket_because_license_plate_is_registered_under_an_expired_parking_pass'
+
+                carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
+
+        print action
+        if action == "valid":
+            # TODO (for JOHN): create new view called processed and update processed view
+            carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
+        return JsonResponse({"carResults_certain":carResults_certain, "carResults_not_certain" : carResults_not_certain })
+
+
 @csrf_exempt
 def check(request):
 
@@ -132,10 +197,10 @@ def check(request):
     # print carResult
 
     # TODO (for JOHN): Increase database counter for number of slots scanned
-
+    # NUM_SLOTS_SCANNED = NUM_SLOTS_SCANNED + 1
     # If there is a not a car in the image figure increase the empty slot counter:
     if carResult == "no_car":
-        #EMPTY_SLOTS = EMPTY_SLOTS + 1
+        # EMPTY_SLOTS = EMPTY_SLOTS + 1
         # TODO (for JOHN): Increase database counter for empty slots
         return JsonResponse({"Car_result": "Empty parking slot"})
 
@@ -146,31 +211,8 @@ def check(request):
         print type(files["image"])
         r = requests.post(url = OPEN_ALPR_URL, files=files, params = OPEN_ALPR_PARAMS)
         openalpr_cars = json.loads(r.content)
-        print openalpr_cars
-        for carIndex in range(0, len(openalpr_cars['results'])):
-            checkCar = cars['results'][carIndex]
-            plateNum = checkCar['plate']
-            certainty = checkCar['confidence']
-            region = checkCar['region']
-            carResults = []
-            if certainty >0.8:
-                # checkCar = car.objects.filter(licence_plate=plateNum)
-                action = 'valid'
-                if not car.objects.filter(licence_plate=plateNum):
-                    car.objects.create(model =checkCar['vehicle']['body_type'][0]['name']+' '+checkCar['vehicle']['year'][0]['name'], brand=checkCar['vehicle']['make'][0]['name'], licence_plate=plateNum, color=checkCar['vehicle']['color'][0]['name'])
-                    #ticket.objects.create(ticketed_car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
-
-                    action='ticket_because_plate_not_in_db'
-                elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now():
-                    # elif not parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum))[0].parking_pass <= datetime.datetime.now():
-                    #ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
-                    action='ticket_because_expired_pass_or_no_pass_but_plate_in_db'
-                carResults.append([plateNum, action])
-            print action
-            return JsonResponse({plateNum: action})
-
-        return JsonResponse({"results":carResults})
-    return JsonResponse({"Error": "No image file"})
+        json_result_response = determine_if_license_plate_is_valid(openalpr_cars, request, image_path)
+    return json_result_response
 
 
 @csrf_exempt
@@ -304,6 +346,7 @@ def parking(request):
 
 def ticketView(request):
     data = {}
+    # TODO (for JOHN): create add reson to view
     data['tickets']= ticket.objects.all().order_by('-id')
     data['cars']= car.objects.all()
     return render(request, "tickets.html", context=data)
