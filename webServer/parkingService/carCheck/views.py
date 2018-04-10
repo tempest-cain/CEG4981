@@ -23,6 +23,7 @@ import views
 import json
 DEFAULT_FINE = 20
 NUM_SLOTS_SCANNED = 0
+DEFAULT_LOT = 0
 
 OPEN_ALPR_URL = "https://api.openalpr.com/v2/recognize"
 OPEN_ALPR_PARAMS = {
@@ -32,15 +33,24 @@ OPEN_ALPR_PARAMS = {
         }
 
 def index(request):
+    # TODO: HAV A CHECKED CAR FOR VALID CARS THAT HAVE BEEN SCANNED, BUTTON TO SEND TO FAILED PHOTO CALLED "FALSE POSITIVE"
     return render(request, "index.html")
 
 def uncertainView(request):
-    
+    data = {}
+    data['tickets']= uncertain_photos.objects.all().order_by('-id')
     return render(request, "uncertain.html", context=data)
 
 def uncertainRequest(request, pk = None):
     result = 'failed'
-    # logic here
+    if uncertain_photos.objects.get(pk=pk) and not request.POST.get('delete'):
+        if 0 == len(car.objects.filter(licence_plate=request.POST.get('plate'))):
+            car.objects.create(licence_plate=request.POST.get('plate'))
+        ticket.objects.create(ticketed_car = car.objects.create(licence_plate=request.POST.get('plate')), fine_amount = request.POST.get('fine') or DEFAULT_FINE, photo = uncertain_photos.objects.get(pk=pk).photo)
+        result = "Ticketed!"
+    elif uncertain_photos.objects.get(pk=pk) and request.POST.get('delete'):
+        uncertain_photos.objects.get(pk=pk).delete()
+        resulted = 'Deleted!'
     return JsonResponse({'update':result})
 
 @csrf_exempt
@@ -118,6 +128,7 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
         if (certainty <= 0.79 and len(carResults_certain) <= 0):
             # Add to uncertain and update view for review_needed
             # TODO (for JOHN): Update for review_needed
+            # todo: REPLACE NOPASS WITH ACTION (JOHN)
             # File(open('path_to_pic/image.png', 'r')
             carResults_not_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "No license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
 
@@ -187,13 +198,11 @@ def check(request):
     # Use image classifier to figure out if there is a car in the image
     carResult = predict.checkCar(request.FILES['file'].name)
     # print carResult
-
-    # TODO (for JOHN): Increase database counter for number of slots scanned
-    # NUM_SLOTS_SCANNED = NUM_SLOTS_SCANNED + 1
+    parking_lot.objects.get(pk = DEFAULT_LOT).spots_scanned +=1
     # If there is a not a car in the image figure increase the empty slot counter:
     if carResult == "no_car":
-        # EMPTY_SLOTS = EMPTY_SLOTS + 1
-        # TODO (for JOHN): Increase database counter for empty slots
+        parking_lot.objects.get(pk = DEFAULT_LOT).spots_empty +=1
+        os.remove(image_path)
         return JsonResponse({"Car_result": "Empty parking slot"})
 
     # If there is a car in the image figure out if it needs a ticket:
@@ -314,6 +323,7 @@ def logout_view(request):
 
 
 def parking(request):
+    # todo: JOHN ADD HOW MANY SCANNED, PROCESSED SLOTS, AND CONF = EMPY/SCANNED
     return render(request, "parking.html")
 
 def ticketView(request):
@@ -325,5 +335,4 @@ def ticketView(request):
 
 
 def photoview(request, pk = None):
-    # image_data = open(image.objects.get(pk=pk).photo, "rb").read()
     return HttpResponse(image.objects.get(pk=pk).photo, content_type="image/png")

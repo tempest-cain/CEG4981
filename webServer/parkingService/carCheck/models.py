@@ -21,12 +21,15 @@ class car(models.Model):
 class ticket(models.Model):
     ticketed_car = models.ForeignKey(car)
     fine_amount = models.DecimalField(decimal_places=2, max_digits=10)
+    reason = models.CharField(max_length=1000)
     photo = models.ImageField(upload_to='./', null = True)
     date=models.DateField(auto_now=True)
 
-class parkingLot(models.Model):
-    spots_scanned = models.IntegerField()
-    spots_empty = models.IntegerField()
+class parking_lot(models.Model):
+    lot_name = models.CharField(max_length = 100)
+    spots_scanned = models.IntegerField(default = 0)
+    spots_empty = models.IntegerField(default = 0)
+    max_spots = models.IntegerField(default = 1)
 
 class uncertain_photos(models.Model):
     ticketed_car = models.CharField(max_length=10)

@@ -27,6 +27,7 @@
               <th>Car</th>
               <th>Photo</th>
               <th>Amount</th>
+              <th>Reason</th>
               <th>Date</th>
               <th>Send</th>
               <th>Ignore</th>
@@ -40,6 +41,7 @@
             <td>{{ ticket.ticketed_car }}</td>
             <td><a class="waves-effect waves-light btn modal-trigger" id="/media/{{ ticket.photo }}" href="#modal1">Photo</a></td>
             <td>${{ ticket.fine_amount}}</td>
+            <td>{{ ticket.reason}}</td>
             <td>{{ ticket.date}}</td>
             <td>send link</td>
             <td>ignore link</td>
