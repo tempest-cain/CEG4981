@@ -33,6 +33,7 @@ OPEN_ALPR_PARAMS = {
         }
 
 def index(request):
+    # TODO: HAV A CHECKED CAR FOR VALID CARS THAT HAVE BEEN SCANNED, BUTTON TO SEND TO FAILED PHOTO CALLED "FALSE POSITIVE"
     return render(request, "index.html")
 
 def uncertainView(request):
@@ -127,6 +128,7 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
         if (certainty <= 0.79 and len(carResults_certain) <= 0):
             # Add to uncertain and update view for review_needed
             # TODO (for JOHN): Update for review_needed
+            # todo: REPLACE NOPASS WITH ACTION (JOHN)
             # File(open('path_to_pic/image.png', 'r')
             carResults_not_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "No license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
 
@@ -321,6 +323,7 @@ def logout_view(request):
 
 
 def parking(request):
+    # todo: JOHN ADD HOW MANY SCANNED, PROCESSED SLOTS, AND CONF = EMPY/SCANNED
     return render(request, "parking.html")
 
 def ticketView(request):

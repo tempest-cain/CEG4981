@@ -29,6 +29,7 @@ class parking_lot(models.Model):
     lot_name = models.CharField(max_length = 100)
     spots_scanned = models.IntegerField(default = 0)
     spots_empty = models.IntegerField(default = 0)
+    max_spots = models.IntegerField(default = 1)
 
 class uncertain_photos(models.Model):
     ticketed_car = models.CharField(max_length=10)
