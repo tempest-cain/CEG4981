@@ -4,6 +4,33 @@
 <!-- <script src="{%static 'bootstarp/js/bootstrap.min.js'%}"></script> -->
 <script src="{%static 'materialize/js/materialize.min.js'%}"></script>
 <script>
+function deleteRow(pk){
+  url = '/uncertain/'+pk;
+  $.ajax({
+      url: url ,
+      type: 'POST',
+      data:{'delete':true}
+  }).done(function(data){
+  $('#'+pk).remove();
+  });
+}
+
+function submitRow(pk){
+  url = '/uncertain/'+pk;
+  data = {
+    delete:false,
+    plate = $('#plate'+pk).val(),
+    fine = $('#fine'+pk).val(),
+  };
+  $.ajax({
+      url: url ,
+      type: 'POST',
+      data:
+  }).done(function(data){
+  $('#'+pk).remove();
+  });
+}
+
   $(function(){
     $('.modal').modal();
     $('.modal-trigger').click(function(){
@@ -28,6 +55,7 @@
               <th>Photo</th>
               <th>Amount</th>
               <th>Date</th>
+              <th>Message</th>
               <th>Update</th>
               <th>Ignore</th>
           </tr>
@@ -35,14 +63,15 @@
 
         <tbody class="white-text">
           {% for ticket in tickets %}
-          <tr>
+          <tr id='{{ticket.pk}}'>
             <td>{{ ticket.pk }}</td>
-            <td><<input type="text"></td>
+            <td><<input type="text" default='{{ticket.ticketed_car}}' id='plate{{ticket.pk}}'></td>
             <td><a class="waves-effect waves-light btn modal-trigger" id="/media/{{ ticket.photo }}" href="#modal1">Photo</a></td>
-            <td>$<input type='text' default = "20"/></td>
+            <td>$<input type='text' default = "20" id="fine{{ticket.pk}}"/></td>
+            <td>{{ ticket.message }}</td>
             <td>{{ ticket.date}}</td>
-            <td>send link</td>
-            <td>ignore link</td>
+            <td><button class='waves-effect waves-teal btn-flat' disabled>Submit</button></td>
+            <td><button class='red darken-2 btn-flat' onclick="deleteRow({{ tiecket.pk }})">Ignore</button></td>
           </tr>
           {% endfor %}
         </tbody>

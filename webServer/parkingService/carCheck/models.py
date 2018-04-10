@@ -21,6 +21,7 @@ class car(models.Model):
 class ticket(models.Model):
     ticketed_car = models.ForeignKey(car)
     fine_amount = models.DecimalField(decimal_places=2, max_digits=10)
+    reason = models.CharField(max_length=1000)
     photo = models.ImageField(upload_to='./', null = True)
     date=models.DateField(auto_now=True)
 

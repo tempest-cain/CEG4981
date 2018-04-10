@@ -44,7 +44,7 @@ def uncertainRequest(request, pk = None):
     if uncertain_photos.objects.get(pk=pk) and not request.POST.get('delete'):
         if 0 == len(car.objects.filter(licence_plate=request.POST.get('plate'))):
             car.objects.create(licence_plate=request.POST.get('plate'))
-        ticket.objects.create(ticketed_car = car.objects.create(licence_plate=request.POST.get('plate')), fine_amount = DEFAULT_FINE, photo = uncertain_photos.objects.get(pk=pk).photo)
+        ticket.objects.create(ticketed_car = car.objects.create(licence_plate=request.POST.get('plate')), fine_amount = request.POST.get('fine') or DEFAULT_FINE, photo = uncertain_photos.objects.get(pk=pk).photo)
         result = "Ticketed!"
     elif uncertain_photos.objects.get(pk=pk) and request.POST.get('delete'):
         uncertain_photos.objects.get(pk=pk).delete()
@@ -333,5 +333,4 @@ def ticketView(request):
 
 
 def photoview(request, pk = None):
-    # image_data = open(image.objects.get(pk=pk).photo, "rb").read()
     return HttpResponse(image.objects.get(pk=pk).photo, content_type="image/png")
