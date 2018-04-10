@@ -35,12 +35,20 @@ def index(request):
     return render(request, "index.html")
 
 def uncertainView(request):
-    
+    data = {}
+    data['tickets']= uncertain_photos.objects.all().order_by('-id')
     return render(request, "uncertain.html", context=data)
 
 def uncertainRequest(request, pk = None):
     result = 'failed'
-    # logic here
+    if uncertain_photos.objects.get(pk=pk) and not request.POST.get('delete'):
+        if 0 == len(car.objects.filter(licence_plate=request.POST.get('plate'))):
+            car.objects.create(licence_plate=request.POST.get('plate'))
+        ticket.objects.create(ticketed_car = car.objects.create(licence_plate=request.POST.get('plate')), fine_amount = DEFAULT_FINE, photo = uncertain_photos.objects.get(pk=pk).photo)
+        result = "Ticketed!"
+    elif uncertain_photos.objects.get(pk=pk) and request.POST.get('delete'):
+        uncertain_photos.objects.get(pk=pk).delete()
+        resulted = 'Deleted!'
     return JsonResponse({'update':result})
 
 @csrf_exempt
