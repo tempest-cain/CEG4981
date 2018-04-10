@@ -23,6 +23,7 @@ import views
 import json
 DEFAULT_FINE = 20
 NUM_SLOTS_SCANNED = 0
+DEFAULT_LOT = 0
 
 OPEN_ALPR_URL = "https://api.openalpr.com/v2/recognize"
 OPEN_ALPR_PARAMS = {
@@ -195,13 +196,11 @@ def check(request):
     # Use image classifier to figure out if there is a car in the image
     carResult = predict.checkCar(request.FILES['file'].name)
     # print carResult
-
-    # TODO (for JOHN): Increase database counter for number of slots scanned
-    # NUM_SLOTS_SCANNED = NUM_SLOTS_SCANNED + 1
+    parking_lot.objects.get(pk = DEFAULT_LOT).spots_scanned +=1
     # If there is a not a car in the image figure increase the empty slot counter:
     if carResult == "no_car":
-        # EMPTY_SLOTS = EMPTY_SLOTS + 1
-        # TODO (for JOHN): Increase database counter for empty slots
+        parking_lot.objects.get(pk = DEFAULT_LOT).spots_empty +=1
+        os.remove(image_path)
         return JsonResponse({"Car_result": "Empty parking slot"})
 
     # If there is a car in the image figure out if it needs a ticket:

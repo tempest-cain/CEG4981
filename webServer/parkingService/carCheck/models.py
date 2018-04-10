@@ -25,9 +25,10 @@ class ticket(models.Model):
     photo = models.ImageField(upload_to='./', null = True)
     date=models.DateField(auto_now=True)
 
-class parkingLot(models.Model):
-    spots_scanned = models.IntegerField()
-    spots_empty = models.IntegerField()
+class parking_lot(models.Model):
+    lot_name = models.CharField(max_length = 100)
+    spots_scanned = models.IntegerField(default = 0)
+    spots_empty = models.IntegerField(default = 0)
 
 class uncertain_photos(models.Model):
     ticketed_car = models.CharField(max_length=10)
