@@ -35,8 +35,8 @@ class parking_lot(models.Model):
     max_spots = models.IntegerField(default = 1)
 
 class uncertain_photos(models.Model):
-    ticketed_car = models.CharField(max_length=10)
-    fine_amount = models.DecimalField(decimal_places=2, max_digits=10)
+    ticketed_car = models.CharField(max_length=10, null=True, blank=True)
+    fine_amount = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
     photo = models.ImageField(upload_to='./', null = True)
     action = models.CharField(max_length=1000)
     message = models.CharField(max_length = 1000)

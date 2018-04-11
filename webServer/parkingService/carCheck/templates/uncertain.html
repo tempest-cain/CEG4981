@@ -46,10 +46,10 @@ function deleteRow(pk){
 }
 
 function submitRow(pk){
-  if (!$('#car'+pk).val()){
+  if (!$('#plate'+pk).val()){
     alert("Car needs a plate number!");
-  }else if (!$('#fine'+pk).val()) {
-    alert("Car needs a Fine amount!");
+  }else if (!$('#fine'+pk).val() && parseFloat($('#fine'+pk).val()) > 0 ) {
+    alert("Car needs a Positive Fine amount!");
   }else{
     url = '/correct/'+pk;
     $.ajax({
@@ -57,7 +57,7 @@ function submitRow(pk){
         type: 'POST',
         data:{
           'delete':false,
-          'plate':$('#car'+pk).val(),
+          'plate':$('#plate'+pk).val(),
           'fine':$('#fine'+pk).val()
         }
     }).done(function(data){
@@ -112,7 +112,7 @@ function submitRow(pk){
             </td>
             <td>{{ ticket.message }}</td>
             <td>{{ ticket.date}}</td>
-            <td><button class='waves-effect waves-teal btn-flat'>Submit</button></td>
+            <td><a class="waves-effect waves-light btn modal-trigger" onclick="submitRow({{ticket.pk}})">Submit</a></td>
             <td><button class='red darken-2 btn-flat' onclick="deleteRow({{ ticket.pk }})">Ignore</button></td>
           </tr>
           {% endfor %}

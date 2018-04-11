@@ -38,25 +38,32 @@ def index(request):
 
 def uncertainView(request):
     data = {}
-    data['tickets']= uncertain_photos.objects.all().order_by('-id')
+    data['tickets']= uncertain_photos.objects.filter(processed = False).order_by('-id')
     return render(request, "uncertain.html", context=data)
 
 def uncertainRequest(request, pk = None):
     result = 'failed'
-    print('got function')
+    print('got here')
     print(pk)
+    print(request.POST.get('delete'))
+    print(request.POST.get('fine'))
+    print(request.POST.get('plate'))
+
     if uncertain_photos.objects.get(pk=pk) and not request.POST.get('delete'):
-        car = uncertain_photos.objects.get(pk=pk)
+        uncertain = uncertain_photos.objects.get(pk=pk)
         if 0 == len(car.objects.filter(licence_plate=request.POST.get('plate'))):
             car.objects.create(licence_plate=request.POST.get('plate'))
-        processed.objects.create(car = car.objects.create(licence_plate=request.POST.get('plate')), fine_amount = request.POST.get('fine') or DEFAULT_FINE, photo = uncertain_photos.objects.get(pk=pk).photo)
-        uncertain_photos.objects.get(pk=pk).processed = True
+        print("before processed")
+        processed.objects.create(car = car.objects.create(licence_plate=request.POST.get('plate')), fine_amount = request.POST.get('fine') or DEFAULT_FINE, photo = uncertain.photo)
+        print("processed")
+        uncertain.processed = True
+        uncertain.save()
         result = "Ticketed!"
     elif uncertain_photos.objects.get(pk=pk) and request.POST.get('delete'):
-        car = uncertain_photos.objects.get(pk=pk)
-        print('got here')
-        uncertain_photos.objects.get(pk=pk).ignored = True
-        uncertain_photos.objects.get(pk=pk).processed = True
+        uncertain = uncertain_photos.objects.get(pk=pk)
+        uncertain.ignored = True
+        uncertain.processed = True
+        uncertain.save()
         resulted = 'Deleted!'
     return JsonResponse({'update':result})
 
