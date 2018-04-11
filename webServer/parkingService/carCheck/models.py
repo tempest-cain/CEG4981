@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from datetime import datetime
+import datetime
 from django.db import models
 
 class parking_pass(models.Model):
     pass_number = models.IntegerField(unique=True)
-    expiration = models.DateField(default=datetime.now)
+    expiration = models.DateField(default=datetime.datetime.now().date())
     owner = models.CharField(max_length=300) #would be student ID in real applicatoin
 
 class car(models.Model):

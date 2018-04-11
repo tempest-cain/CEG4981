@@ -88,7 +88,7 @@ def checkbyjohn(request):
                     processed.objects.create(car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
 
                     action='ticket'
-                elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now():
+                elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now().date():
                     # elif not parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum))[0].parking_pass <= datetime.datetime.now():
                     processed.objects.create(car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
                     action='ticket'
@@ -141,13 +141,14 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
             carResults_not_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "No license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
 
         if certainty > 0.8:
-            # checkCar = car.objects.filter(licence_plate=plateNum)
-            # print checkCar
+            #checkCar = car.objects.filter(licence_plate=plateNum)[0].parking_pass
+            print  car.objects.filter(licence_plate=plateNum)[0].parking_pass.expiration
+            print datetime.datetime.now().date()
             action = 'valid'
             vehicle_model = checkCar['vehicle']['body_type'][0]['name']+ ' ' + checkCar['vehicle']['year'][0]['name']
             vehicle_make = checkCar['vehicle']['make'][0]['name']
             vehicle_color = checkCar['vehicle']['color'][0]['name']
-            #print parking_pass.objects.filter(pk=car.objects.filter(licence_plate=plateNum)[0])
+
             # If car object is not in database:
             if not car.objects.filter(licence_plate=plateNum):
                 # Create car object in database
@@ -169,7 +170,7 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
 
                 carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
 
-            elif not (parking_pass.objects.filter(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass).expiration <= datetime.datetime.now()):
+            elif (car.objects.filter(licence_plate=plateNum)[0].parking_pass).expiration < datetime.datetime.now().date():
 
                 # Generate ticket because license plate is under an expired pass
                 processed.objects.create(car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'], fined=True)
