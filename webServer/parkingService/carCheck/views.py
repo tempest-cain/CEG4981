@@ -176,7 +176,6 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
             carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
         return JsonResponse({"carResults_certain":carResults_certain, "carResults_not_certain" : carResults_not_certain })
 
-
 @csrf_exempt
 def check(request):
 
@@ -214,7 +213,6 @@ def check(request):
         openalpr_cars = json.loads(r.content)
         json_result_response = determine_if_license_plate_is_valid(openalpr_cars, request, image_path)
     return json_result_response
-
 
 @csrf_exempt
 def checkbygoonmeetold(request):
@@ -305,7 +303,6 @@ def simple_upload(request):
         })
     return render(request, 'core/simple_upload.html')
 
-
 def createAccount(request):
     if request.method == "POST":
         user = NewUserForm(request.POST)
@@ -321,7 +318,6 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect('/')
 
-
 def parking(request):
     # todo: JOHN ADD HOW MANY SCANNED, PROCESSED SLOTS, AND CONF = EMPY/SCANNED
     return render(request, "parking.html")
@@ -333,6 +329,12 @@ def ticketView(request):
     data['cars']= car.objects.all()
     return render(request, "tickets.html", context=data)
 
+def processedView(request):
+    data = {}
+    # TODO (for JOHN): create add reson to view
+    data['tickets']= ticket.objects.all().order_by('-id')
+    data['cars']= car.objects.all()
+    return render(request, "processed.html", context=data)
 
 def photoview(request, pk = None):
     return HttpResponse(image.objects.get(pk=pk).photo, content_type="image/png")
