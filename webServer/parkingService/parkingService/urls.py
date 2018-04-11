@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^$', index),
     url(r'^admin/', admin.site.urls),
     url(r'^login/', login),
+    url(r'^processed/', processedView),
     url(r'^logout/', logout_view),
     url(r'^createaccount/', createAccount),
     url(r'^parking/', parking),
