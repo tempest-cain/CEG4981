@@ -4,8 +4,38 @@
 <!-- <script src="{%static 'bootstarp/js/bootstrap.min.js'%}"></script> -->
 <script src="{%static 'materialize/js/materialize.min.js'%}"></script>
 <script>
+
+function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = jQuery.trim(cookies[i]);
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
+function csrfSafeMethod(method) {
+  // these HTTP methods do not require CSRF protection
+  return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+  beforeSend: function(xhr, settings) {
+    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    }
+  }
+});
+
 function deleteRow(pk){
-  url = '/uncertain/'+pk;
+  url = '/correct/'+pk;
   $.ajax({
       url: url ,
       type: 'POST',
@@ -16,20 +46,27 @@ function deleteRow(pk){
 }
 
 function submitRow(pk){
-  url = '/uncertain/'+pk;
-  data = {
-    delete:false,
-    plate = $('#plate'+pk).val(),
-    fine = $('#fine'+pk).val(),
-  };
-  $.ajax({
-      url: url ,
-      type: 'POST',
-      data:
-  }).done(function(data){
-  $('#'+pk).remove();
-  });
+  if (!$('#car'+pk).val()){
+    alert("Car needs a plate number!");
+  }else if (!$('#fine'+pk).val()) {
+    alert("Car needs a Fine amount!");
+  }else{
+    url = '/correct/'+pk;
+    $.ajax({
+        url: url ,
+        type: 'POST',
+        data:{
+          'delete':false,
+          'plate':$('#car'+pk).val(),
+          'fine':$('#fine'+pk).val()
+        }
+    }).done(function(data){
+    $('#'+pk).remove();
+    });
+  }
+
 }
+
 
   $(function(){
     $('.modal').modal();
@@ -65,13 +102,18 @@ function submitRow(pk){
           {% for ticket in tickets %}
           <tr id='{{ticket.pk}}'>
             <td>{{ ticket.pk }}</td>
-            <td><<input type="text" default='{{ticket.ticketed_car}}' id='plate{{ticket.pk}}'></td>
+            <td><input type="text" default='{{ticket.ticketed_car}}' id='plate{{ticket.pk}}'></td>
             <td><a class="waves-effect waves-light btn modal-trigger" id="/media/{{ ticket.photo }}" href="#modal1">Photo</a></td>
-            <td>$<input type='text' default = "20" id="fine{{ticket.pk}}"/></td>
+            <td>
+              <div class="input-field">
+              <i class=" prefix">$</i>
+          <input type='text' default = "20" id="fine{{ticket.pk}}"/>
+            </div>
+            </td>
             <td>{{ ticket.message }}</td>
             <td>{{ ticket.date}}</td>
-            <td><button class='waves-effect waves-teal btn-flat' disabled>Submit</button></td>
-            <td><button class='red darken-2 btn-flat' onclick="deleteRow({{ tiecket.pk }})">Ignore</button></td>
+            <td><button class='waves-effect waves-teal btn-flat'>Submit</button></td>
+            <td><button class='red darken-2 btn-flat' onclick="deleteRow({{ ticket.pk }})">Ignore</button></td>
           </tr>
           {% endfor %}
         </tbody>

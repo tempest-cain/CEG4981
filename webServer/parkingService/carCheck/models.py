@@ -18,12 +18,15 @@ class car(models.Model):
     def __str__(self):
         return '%s' % (self.licence_plate)
 
-class ticket(models.Model):
-    ticketed_car = models.ForeignKey(car)
-    fine_amount = models.DecimalField(decimal_places=2, max_digits=10)
-    reason = models.CharField(max_length=1000)
+class processed(models.Model):
+    car = models.ForeignKey(car)
+    fine_amount = models.DecimalField(decimal_places=2, max_digits=10, null=True)
+    reason = models.CharField(max_length=1000, null = True)
     photo = models.ImageField(upload_to='./', null = True)
     date=models.DateField(auto_now=True)
+    fined = models.BooleanField()
+
+
 
 class parking_lot(models.Model):
     lot_name = models.CharField(max_length = 100)
@@ -38,3 +41,5 @@ class uncertain_photos(models.Model):
     action = models.CharField(max_length=1000)
     message = models.CharField(max_length = 1000)
     date=models.DateField(auto_now=True)
+    ignored=models.BooleanField(default = False)
+    processed = models.BooleanField(default = False)

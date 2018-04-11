@@ -6,6 +6,6 @@ from .models import *
 
 admin.site.register(parking_pass)
 admin.site.register(car)
-admin.site.register(ticket)
+admin.site.register(processed)
 admin.site.register(parking_lot)
 admin.site.register(uncertain_photos)

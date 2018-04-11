@@ -43,13 +43,20 @@ def uncertainView(request):
 
 def uncertainRequest(request, pk = None):
     result = 'failed'
+    print('got function')
+    print(pk)
     if uncertain_photos.objects.get(pk=pk) and not request.POST.get('delete'):
+        car = uncertain_photos.objects.get(pk=pk)
         if 0 == len(car.objects.filter(licence_plate=request.POST.get('plate'))):
             car.objects.create(licence_plate=request.POST.get('plate'))
-        ticket.objects.create(ticketed_car = car.objects.create(licence_plate=request.POST.get('plate')), fine_amount = request.POST.get('fine') or DEFAULT_FINE, photo = uncertain_photos.objects.get(pk=pk).photo)
+        processed.objects.create(car = car.objects.create(licence_plate=request.POST.get('plate')), fine_amount = request.POST.get('fine') or DEFAULT_FINE, photo = uncertain_photos.objects.get(pk=pk).photo)
+        uncertain_photos.objects.get(pk=pk).processed = True
         result = "Ticketed!"
     elif uncertain_photos.objects.get(pk=pk) and request.POST.get('delete'):
-        uncertain_photos.objects.get(pk=pk).delete()
+        car = uncertain_photos.objects.get(pk=pk)
+        print('got here')
+        uncertain_photos.objects.get(pk=pk).ignored = True
+        uncertain_photos.objects.get(pk=pk).processed = True
         resulted = 'Deleted!'
     return JsonResponse({'update':result})
 
@@ -77,12 +84,12 @@ def checkbyjohn(request):
                 action = 'valid'
                 if not car.objects.filter(licence_plate=plateNum):
                     car.objects.create(model =checkCar['vehicle']['body_type'][0]['name']+' '+checkCar['vehicle']['year'][0]['name'], brand=checkCar['vehicle']['make'][0]['name'], licence_plate=plateNum, color=checkCar['vehicle']['color'][0]['name'])
-                    ticket.objects.create(ticketed_car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
+                    processed.objects.create(car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
 
                     action='ticket'
                 elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now():
                     # elif not parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum))[0].parking_pass <= datetime.datetime.now():
-                    ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
+                    processed.objects.create(car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
                     action='ticket'
                 carResults.append([plateNum, action])
 
@@ -146,7 +153,7 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
                 car.objects.create(model=vehicle_model, brand=vehicle_make, licence_plate=plateNum, color=vehicle_color)
 
                 # Generate ticket because license plate is not in database
-                ticket.objects.create(ticketed_car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'])
+                processed.objects.create(car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'])
 
                 action = 'generate_ticket_because_license_plate_is_not_in_db'
 
@@ -155,7 +162,7 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
             elif not (car.objects.filter(licence_plate=plateNum)[0].parking_pass):
 
                 # Generate ticket because license plate is not under a parking pass
-                ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'])
+                processed.objects.create(car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'])
 
                 action='generate_ticket_because_license_plate_is_not_registered_under_a_parking_pass'
 
@@ -164,7 +171,7 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
             elif not (parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now()):
 
                 # Generate ticket because license plate is under an expired pass
-                ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'])
+                processed.objects.create(car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'])
 
                 action='generate_ticket_because_license_plate_is_registered_under_an_expired_parking_pass'
 
@@ -265,12 +272,12 @@ def checkbygoonmeetold(request):
                     action = 'valid'
                     if not car.objects.filter(licence_plate=plateNum):
                         car.objects.create(model =checkCar['vehicle']['body_type'][0]['name']+' '+checkCar['vehicle']['year'][0]['name'], brand=checkCar['vehicle']['make'][0]['name'], licence_plate=plateNum, color=checkCar['vehicle']['color'][0]['name'])
-                        ticket.objects.create(ticketed_car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=data)
+                        processed.objects.create(car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=data)
 
                         action='ticket'
                     elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now():
                         # elif not parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum))[0].parking_pass <= datetime.datetime.now():
-                        ticket.objects.create(ticketed_car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=data)
+                        processed.objects.create(car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=data)
                         action='ticket'
                     carResults.append([plateNum, action])
                 print action
@@ -329,7 +336,7 @@ def parking(request):
 def ticketView(request):
     data = {}
     # TODO (for JOHN): create add reson to view
-    data['tickets']= ticket.objects.all().order_by('-id')
+    data['tickets']= processed.objects.all().order_by('-id')
     data['cars']= car.objects.all()
     return render(request, "tickets.html", context=data)
 
