@@ -18,7 +18,7 @@
           {% for lot in lots %}
           <tr>
             <td>{{ lot.name }}</td>
-            <td>{{ lot.open }}</td>
+            <td>{{ lot.open }}</td>    
             <td>{% widthratio lot.open lot.max_spots 1 %}%</td>
           </tr>
           {% endfor %}
