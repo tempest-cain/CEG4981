@@ -39,7 +39,7 @@ function deleteRow(pk){
   $.ajax({
       url: url ,
       type: 'POST',
-      data:{'delete':true}
+      data:{'delete':1}
   }).done(function(data){
   $('#'+pk).remove();
   });
@@ -48,7 +48,7 @@ function deleteRow(pk){
 function submitRow(pk){
   if (!$('#plate'+pk).val()){
     alert("Car needs a plate number!");
-  }else if (!$('#fine'+pk).val() && parseFloat($('#fine'+pk).val()) > 0 ) {
+  }else if (!(parseFloat($('#fine'+pk).val()) > 0 )) {
     alert("Car needs a Positive Fine amount!");
   }else{
     url = '/correct/'+pk;
@@ -56,7 +56,7 @@ function submitRow(pk){
         url: url ,
         type: 'POST',
         data:{
-          'delete':false,
+          'delete':0,
           'plate':$('#plate'+pk).val(),
           'fine':$('#fine'+pk).val()
         }
@@ -107,7 +107,7 @@ function submitRow(pk){
             <td>
               <div class="input-field">
               <i class=" prefix">$</i>
-          <input type='text' default = "20" id="fine{{ticket.pk}}"/>
+          <input type='number' id="fine{{ticket.pk}}"/>
             </div>
             </td>
             <td>{{ ticket.message }}</td>

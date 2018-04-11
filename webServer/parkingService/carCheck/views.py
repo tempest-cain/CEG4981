@@ -14,7 +14,7 @@ from django.conf.urls.static import static
 from django.core.files import File
 from django.utils import timezone
 from django.conf import settings
-from detect_cars import predict
+# from detect_cars import predict
 from PIL import Image, ExifTags
 from carCheck .forms import *
 from .models import *
@@ -44,18 +44,13 @@ def uncertainView(request):
 
 def uncertainRequest(request, pk = None):
     result = 'failed'
-    print('got here')
-    print(pk)
-    print(request.POST.get('delete'))
-    print(request.POST.get('fine'))
-    print(request.POST.get('plate'))
 
-    if uncertain_photos.objects.get(pk=pk) and not request.POST.get('delete'):
+    if len(uncertain_photos.objects.filter(pk=pk)) and not int(request.POST.get('delete')):
         uncertain = uncertain_photos.objects.get(pk=pk)
         if 0 == len(car.objects.filter(licence_plate=request.POST.get('plate'))):
             car.objects.create(licence_plate=request.POST.get('plate'))
         print("before processed")
-        processed.objects.create(car = car.objects.create(licence_plate=request.POST.get('plate')), fine_amount = request.POST.get('fine') or DEFAULT_FINE, photo = uncertain.photo)
+        processed.objects.create(car = car.objects.get(licence_plate=request.POST.get('plate')), fine_amount = request.POST.get('fine') or DEFAULT_FINE, photo = uncertain.photo, fined=True)
         print("processed")
         uncertain.processed = True
         uncertain.save()
@@ -176,7 +171,7 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
 
                 carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
 
-            elif not (parking_pass.objects.filter(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass).expiration <= datetime.datetime.now()):
+            elif not (car.objects.filter(licence_plate=plateNum)[0].parking_pass.expiration <= datetime.datetime.now().date()):
 
                 # Generate ticket because license plate is under an expired pass
                 processed.objects.create(car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'], fined=True)
@@ -212,14 +207,14 @@ def check(request):
     # print os.path.join(settings.MEDIA_ROOT, image_path)
 
     # Use image classifier to figure out if there is a car in the image
-    carResult = predict.checkCar(request.FILES['file'].name)
+    # carResult = predict.checkCar(request.FILES['file'].name)
     # print carResult
     print len(parking_lot.objects.filter(pk = DEFAULT_LOT))
-    parking_lot.objects.get(pk = DEFAULT_LOT).spots_scanned +=1	
+    parking_lot.objects.get(pk = DEFAULT_LOT).spots_scanned +=1
     # If there is a not a car in the image figure increase the empty slot counter:
     if carResult == "no_car":
         parking_lot.objects.get(pk = DEFAULT_LOT).spots_empty +=1
-        os.remove(image_path)
+        # os.remove(image_path)
         return JsonResponse({"Car_result": "Empty parking slot"})
 
     # If there is a car in the image figure out if it needs a ticket:
@@ -338,13 +333,19 @@ def logout_view(request):
 
 def parking(request):
     # todo: JOHN ADD HOW MANY SCANNED, PROCESSED SLOTS, AND CONF = EMPY/SCANNED
-    return render(request, "parking.html")
+    lots = []
+    for item in parking_lot.objects.all():
+        lot = {}
+        lot['lot_name'] = item.lot_name
+        lot['spots_empty'] = item.spots_empty
+        lot['spots_scanned'] = item.spots_scanned
+        lot['confRatio'] = "{0:.2f}".format(float(item.spots_empty*100)/item.spots_scanned)
+        lots.append(lot)
+    return render(request, "parking.html", context={'lots':lots})
 
 def ticketView(request):
     data = {}
-    # TODO (for JOHN): create add reson to view
     data['tickets']= processed.objects.filter(fined=True).order_by('-id')
-    data['cars']= car.objects.all()
     return render(request, "tickets.html", context=data)
 
 def processedView(request):

@@ -9,6 +9,7 @@
         <thead>
           <tr class="white-text">
               <th>Parking lot</th>
+              <th>Scanned Spots</th>
               <th>Est. Open Spots</th>
               <th>Est. % empty</th>
           </tr>
@@ -17,16 +18,12 @@
         <tbody class="white-text">
           {% for lot in lots %}
           <tr>
-            <td>{{ lot.name }}</td>
-            <td>{{ lot.open }}</td>    
-            <td>{% widthratio lot.open lot.max_spots 1 %}%</td>
+            <td>{{ lot.lot_name }}</td>
+            <td>{{ lot.spots_scanned }}</td>
+            <td>{{ lot.spots_empty }}</td>
+            <td>{{ lot.confRatio }}%</td>
           </tr>
           {% endfor %}
-          <tr>
-            <td>lot 4</td>
-            <td>5</td>
-            <td>1.3%</td>
-          </tr>
         </tbody>
       </table>
     </div>
