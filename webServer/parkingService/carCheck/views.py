@@ -142,7 +142,7 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
 
         if certainty > 0.8:
             #checkCar = car.objects.filter(licence_plate=plateNum)[0].parking_pass
-            print  car.objects.filter(licence_plate=plateNum)[0].parking_pass.expiration
+            #print  car.objects.filter(licence_plate=plateNum)[0].parking_pass.expiration
             print datetime.datetime.now().date()
             action = 'valid'
             vehicle_model = checkCar['vehicle']['body_type'][0]['name']+ ' ' + checkCar['vehicle']['year'][0]['name']
@@ -209,12 +209,15 @@ def check(request):
     carResult = predict.checkCar(request.FILES['file'].name)
     # print carResult
     print len(parking_lot.objects.filter(pk = DEFAULT_LOT))
-    parking_lot.objects.get(pk = DEFAULT_LOT).spots_scanned +=1	
+    parking_lot.objects.get(pk = DEFAULT_LOT).spots_scanned +=1
     # If there is a not a car in the image figure increase the empty slot counter:
+    carResults_certain = []
     if carResult == "no_car":
         parking_lot.objects.get(pk = DEFAULT_LOT).spots_empty +=1
-        os.remove(image_path)
-        return JsonResponse({"Car_result": "Empty parking slot"})
+        print request.FILES['file']
+        carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "no_car_in_image", "plateNum" : "N/A", "action" : "no_car_in_image"})
+        processed.objects.create(car=car.objects.get(licence_plate="N/A"), fine_amount=0, photo=data, fined=False)
+        return JsonResponse(carResults_certain[0])
 
     # If there is a car in the image figure out if it needs a ticket:
     if carResult == "car":
