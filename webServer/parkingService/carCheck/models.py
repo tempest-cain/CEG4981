@@ -25,6 +25,7 @@ class processed(models.Model):
     photo = models.ImageField(upload_to='./', null = True)
     date=models.DateField(auto_now=True)
     fined = models.BooleanField(default = False)
+    sent = models.BooleanField(default = False)
 
 
 

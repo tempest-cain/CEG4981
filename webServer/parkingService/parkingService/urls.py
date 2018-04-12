@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^ticket/', ticketView),
     url(r'^uncertain/', uncertainView),
     url(r'^correct/(?P<pk>.*)$', uncertainRequest),
+    url(r'^ticketAction/(?P<pk>.*)$', ticketRequest),
     url(r'^check/', check, name="check"),
     url(r'^checkbyjohn/', checkbyjohn, name="checkbyjohn"),
     url(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
