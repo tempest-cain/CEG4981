@@ -14,7 +14,7 @@ from django.conf.urls.static import static
 from django.core.files import File
 from django.utils import timezone
 from django.conf import settings
-# from detect_cars import predict
+from detect_cars import predict
 from PIL import Image, ExifTags
 from carCheck .forms import *
 from .models import *
@@ -34,7 +34,6 @@ OPEN_ALPR_PARAMS = {
         }
 
 def index(request):
-    # TODO: HAV A CHECKED CAR FOR VALID CARS THAT HAVE BEEN SCANNED, BUTTON TO SEND TO FAILED PHOTO CALLED "FALSE POSITIVE"
     return render(request, "index.html")
 
 def uncertainView(request):
@@ -49,9 +48,7 @@ def uncertainRequest(request, pk = None):
         uncertain = uncertain_photos.objects.get(pk=pk)
         if 0 == len(car.objects.filter(licence_plate=request.POST.get('plate'))):
             car.objects.create(licence_plate=request.POST.get('plate'))
-        print("before processed")
         processed.objects.create(car = car.objects.get(licence_plate=request.POST.get('plate')), fine_amount = request.POST.get('fine') or DEFAULT_FINE, photo = uncertain.photo, fined=True)
-        print("processed")
         uncertain.processed = True
         uncertain.save()
         result = "Ticketed!"
@@ -62,43 +59,6 @@ def uncertainRequest(request, pk = None):
         uncertain.save()
         resulted = 'Deleted!'
     return JsonResponse({'update':result})
-
-@csrf_exempt
-def checkbyjohn(request):
-    URL = "https://api.openalpr.com/v2/recognize"
-    for image in request.FILES:
-        PARAMS = {
-                'secret_key':"sk_fd494c5574d66d4278ce39fe",
-                'country':"us",
-                'recognize_vehicle':1,
-                }
-        files = {'image': request.FILES[image]}
-        r = requests.post(url = URL, files=files, params = PARAMS)
-        cars = json.loads(r.content)
-        print cars
-        for carIndex in  range(0, len(cars['results'])):
-            checkCar = cars['results'][carIndex]
-            plateNum = checkCar['plate']
-            certainty = checkCar['confidence']
-            region = checkCar['region']
-            carResults = []
-            if certainty >.8:
-                # checkCar = car.objects.filter(licence_plate=plateNum)
-                action = 'valid'
-                if not car.objects.filter(licence_plate=plateNum):
-                    car.objects.create(model =checkCar['vehicle']['body_type'][0]['name']+' '+checkCar['vehicle']['year'][0]['name'], brand=checkCar['vehicle']['make'][0]['name'], licence_plate=plateNum, color=checkCar['vehicle']['color'][0]['name'])
-                    processed.objects.create(car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
-
-                    action='ticket'
-                elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now().date():
-                    # elif not parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum))[0].parking_pass <= datetime.datetime.now():
-                    processed.objects.create(car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES[image])
-                    action='ticket'
-                carResults.append([plateNum, action])
-
-
-        return JsonResponse({"results":carResults})
-    return JsonResponse({"Error": "No image file"})
 
 def fix_image_rotation(image_path):
     try:
@@ -124,7 +84,6 @@ def fix_image_rotation(image_path):
 def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
     carResults_certain = []
     carResults_not_certain = []
-    print openalpr_cars
     if len(openalpr_cars['results']) == 0:
         carResults_not_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "No license plate detected"})
         return JsonResponse({"carResults_certain": carResults_certain, "carResults_not_certain" : carResults_not_certain })
@@ -144,8 +103,6 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
 
         if certainty > 0.8:
             #checkCar = car.objects.filter(licence_plate=plateNum)[0].parking_pass
-            #print  car.objects.filter(licence_plate=plateNum)[0].parking_pass.expiration
-            print datetime.datetime.now().date()
             action = 'valid'
             vehicle_model = checkCar['vehicle']['body_type'][0]['name']+ ' ' + checkCar['vehicle']['year'][0]['name']
             vehicle_make = checkCar['vehicle']['make'][0]['name']
@@ -155,7 +112,6 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
             if not car.objects.filter(licence_plate=plateNum):
                 # Create car object in database
                 car.objects.create(model=vehicle_model, brand=vehicle_make, licence_plate=plateNum, color=vehicle_color)
-                print car.objects.filter(licence_plate=plateNum)
                 # Generate ticket because license plate is not in database
                 processed.objects.create(car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'], fined=True)
 
@@ -179,7 +135,6 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
 
                 carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
 
-        print action
         if action == "valid":
             # TODO (for JOHN): create new view called processed and update processed view
             carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "license plate detected with certainty greater than 80%", "plateNum" : plateNum, "action" : action})
@@ -192,29 +147,18 @@ def check(request):
 
     # Assume no carResults
     carResult = "no_car"
-    print request.FILES
-    print ("File", request.FILES['file'].name)
-    #print ("Image", request.FILES[image])
 
     # Store picture into media folder for access
     data = request.FILES['file']
     image_path = default_storage.save('detect_cars/'+request.FILES['file'].name, request.FILES['file'])
     tmp_file = os.path.join(settings.MEDIA_ROOT, image_path)
-    # print ("temp-file", tmp_file)
-    # print (settings.MEDIA_ROOT, image_path)
-    # print ("curre_path", os.path.dirname(os.path.realpath(__file__)))
-    # print os.path.join(settings.MEDIA_ROOT, image_path)
-
     # Use image classifier to figure out if there is a car in the image
-    # carResult = predict.checkCar(request.FILES['file'].name)
-    # print carResult
-    print len(parking_lot.objects.filter(pk = DEFAULT_LOT))
+    carResult = predict.checkCar(request.FILES['file'].name)
     parking_lot.objects.get(pk = DEFAULT_LOT).spots_scanned +=1
     # If there is a not a car in the image figure increase the empty slot counter:
     carResults_certain = []
     if carResult == "no_car":
         parking_lot.objects.get(pk = DEFAULT_LOT).spots_empty +=1
-        print request.FILES['file']
         tmp_file_object = File(open(tmp_file, "r"))
         carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "no_car_in_image", "plateNum" : "N/A", "action" : "no_car_in_image"})
         #processed.objects.create(car=car.objects.get(licence_plate="N/A"), fine_amount=0, photo=request.FILES['file'], fined=False)
@@ -225,74 +169,10 @@ def check(request):
     if carResult == "car":
         fix_image_rotation(image_path)
         files = {'image':  open(os.path.join(settings.MEDIA_ROOT, image_path))}
-        print type(files["image"])
         r = requests.post(url = OPEN_ALPR_URL, files=files, params = OPEN_ALPR_PARAMS)
         openalpr_cars = json.loads(r.content)
         json_result_response = determine_if_license_plate_is_valid(openalpr_cars, request, image_path)
     return json_result_response
-
-@csrf_exempt
-def checkbygoonmeetold(request):
-    URL = "https://api.openalpr.com/v2/recognize"
-    if request.FILES['file']:
-        carResults = "no_car"
-        files_with_cars = []
-        data = request.FILES['file']
-        path = default_storage.save('detect_cars/'+request.FILES['file'].name, request.FILES[image])
-        if carResults == "car" or True:
-            try:
-                image=Image.open(os.path.join(settings.MEDIA_ROOT, path))
-                for orientation in ExifTags.TAGS.keys():
-                    if ExifTags.TAGS[orientation]=='Orientation':
-                        break
-                exif=dict(image._getexif().items())
-
-                if exif[orientation] == 3:
-                    image=image.rotate(180, expand=True)
-                elif exif[orientation] == 6:
-                    image=image.rotate(270, expand=True)
-                elif exif[orientation] == 8:
-                    image=image.rotate(90, expand=True)
-                image.save(os.path.join(settings.MEDIA_ROOT, path))
-                image.close()
-
-            except (AttributeError, KeyError, IndexError):
-                # cases: image don't have getexif
-                pass
-            PARAMS = {
-                    'secret_key':"sk_fd494c5574d66d4278ce39fe",
-                    'country':"us",
-                    'recognize_vehicle':1,
-                    }
-            print(image)
-            files = {'image':  data}
-            r = requests.post(url = URL, files=files, params = PARAMS)
-            cars = json.loads(r.content)
-            print cars
-            for carIndex in  range(0, len(cars['results'])):
-                checkCar = cars['results'][carIndex]
-                plateNum = checkCar['plate']
-                certainty = checkCar['confidence']
-                region = checkCar['region']
-                carResults = []
-                if certainty >.8:
-                    # checkCar = car.objects.filter(licence_plate=plateNum)
-                    action = 'valid'
-                    if not car.objects.filter(licence_plate=plateNum):
-                        car.objects.create(model =checkCar['vehicle']['body_type'][0]['name']+' '+checkCar['vehicle']['year'][0]['name'], brand=checkCar['vehicle']['make'][0]['name'], licence_plate=plateNum, color=checkCar['vehicle']['color'][0]['name'])
-                        processed.objects.create(car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=data)
-
-                        action='ticket'
-                    elif not car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass) <= datetime.datetime.now():
-                        # elif not parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum)[0].parking_pass or parking_pass.objects.get(pk=car.objects.filter(licence_plate=plateNum))[0].parking_pass <= datetime.datetime.now():
-                        processed.objects.create(car=car.objects.get(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=data)
-                        action='ticket'
-                    carResults.append([plateNum, action])
-                print action
-                return JsonResponse({plateNum: action})
-
-        return JsonResponse({"results":carResults})
-    return JsonResponse({"Error": "No image file"})
 
 def login(request):
     if request.method == "POST":
@@ -307,18 +187,6 @@ def login(request):
         else:
             return render(request, "login.html", {'form': userForm})
     return render(request, 'login.html', {'form': UserForm()})
-
-def simple_upload(request):
-    print "OMG"
-    if request.method == 'POST' and request.FILES['myfile']:
-        myfile = request.FILES['myfile']
-        fs = FileSystemStorage()
-        filename = fs.save(myfile.name, myfile)
-        uploaded_file_url = fs.url(filename)
-        return render(request, 'core/simple_upload.html', {
-            'uploaded_file_url': uploaded_file_url
-        })
-    return render(request, 'core/simple_upload.html')
 
 def createAccount(request):
     if request.method == "POST":
