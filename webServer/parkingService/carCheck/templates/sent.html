@@ -62,8 +62,6 @@ function sendRow(pk){
               <th>Amount</th>
               <th>Reason</th>
               <th>Date</th>
-              <th>Send</th>
-              <th>Ignore</th>
           </tr>
         </thead>
 
@@ -76,8 +74,6 @@ function sendRow(pk){
             <td>${{ ticket.fine_amount}}</td>
             <td>{{ ticket.reason}}</td>
             <td>{{ ticket.date}}</td>
-            <td><a class="waves-effect waves-light btn modal-trigger" onclick="sendRow({{ticket.pk}})">Send</a></td>
-            <td><button class='red darken-2 btn-flat' onclick="ignoreRow({{ ticket.pk }})">Ignore</button></td>
           </tr>
           {% endfor %}
         </tbody>

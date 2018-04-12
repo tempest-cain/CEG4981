@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+import datetime
 from django.db import models
 
 class parking_pass(models.Model):
     pass_number = models.IntegerField(unique=True)
-    expiration = models.DateField()
+    expiration = models.DateField(default=datetime.datetime.now().date())
     owner = models.CharField(max_length=300) #would be student ID in real applicatoin
 
 class car(models.Model):
@@ -24,7 +24,8 @@ class processed(models.Model):
     reason = models.CharField(max_length=1000, null = True)
     photo = models.ImageField(upload_to='./', null = True)
     date=models.DateField(auto_now=True)
-    fined = models.BooleanField()
+    fined = models.BooleanField(default = False)
+    sent = models.BooleanField(default = False)
 
 
 
@@ -35,8 +36,8 @@ class parking_lot(models.Model):
     max_spots = models.IntegerField(default = 1)
 
 class uncertain_photos(models.Model):
-    ticketed_car = models.CharField(max_length=10)
-    fine_amount = models.DecimalField(decimal_places=2, max_digits=10)
+    ticketed_car = models.CharField(max_length=10, null=True, blank=True)
+    fine_amount = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
     photo = models.ImageField(upload_to='./', null = True)
     action = models.CharField(max_length=1000)
     message = models.CharField(max_length = 1000)

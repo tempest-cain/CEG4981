@@ -1,7 +1,13 @@
 {% load static %}
 <link rel="stylesheet" href="{%static 'materialize/css/materialize.min.css'%}">
 <script src="{%static 'materilize/js/materialize.min.js'%}"></script>
-
+<div class="row">
+  <div class="col s8">
+    <p>
+    </p>
+    <a href="/" class="waves-effect waves-light btn">Home</a>
+  </div>
+</div>
 <div class="row">
   <div class=" card blue-grey darken-1 col s8 offset-s2">
     <div class="card-content white-text">
@@ -9,6 +15,7 @@
         <thead>
           <tr class="white-text">
               <th>Parking lot</th>
+              <th>Scanned Spots</th>
               <th>Est. Open Spots</th>
               <th>Est. % empty</th>
           </tr>
@@ -17,16 +24,12 @@
         <tbody class="white-text">
           {% for lot in lots %}
           <tr>
-            <td>{{ lot.name }}</td>
-            <td>{{ lot.open }}</td>    
-            <td>{% widthratio lot.open lot.max_spots 1 %}%</td>
+            <td>{{ lot.lot_name }}</td>
+            <td>{{ lot.spots_scanned }}</td>
+            <td>{{ lot.spots_empty }}</td>
+            <td>{{ lot.confRatio }}%</td>
           </tr>
           {% endfor %}
-          <tr>
-            <td>lot 4</td>
-            <td>5</td>
-            <td>1.3%</td>
-          </tr>
         </tbody>
       </table>
     </div>
