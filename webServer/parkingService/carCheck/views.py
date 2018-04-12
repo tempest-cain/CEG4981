@@ -153,7 +153,7 @@ def determine_if_license_plate_is_valid(openalpr_cars, request, image_path):
             if not car.objects.filter(licence_plate=plateNum):
                 # Create car object in database
                 car.objects.create(model=vehicle_model, brand=vehicle_make, licence_plate=plateNum, color=vehicle_color)
-
+                print car.objects.filter(licence_plate=plateNum)
                 # Generate ticket because license plate is not in database
                 processed.objects.create(car=car.objects.filter(licence_plate=plateNum), fine_amount=DEFAULT_FINE, photo=request.FILES['file'], fined=True)
 
@@ -200,7 +200,7 @@ def check(request):
     data = request.FILES['file']
     image_path = default_storage.save('detect_cars/'+request.FILES['file'].name, request.FILES['file'])
     tmp_file = os.path.join(settings.MEDIA_ROOT, image_path)
-
+    # print ("temp-file", tmp_file)
     # print (settings.MEDIA_ROOT, image_path)
     # print ("curre_path", os.path.dirname(os.path.realpath(__file__)))
     # print os.path.join(settings.MEDIA_ROOT, image_path)
@@ -215,8 +215,10 @@ def check(request):
     if carResult == "no_car":
         parking_lot.objects.get(pk = DEFAULT_LOT).spots_empty +=1
         print request.FILES['file']
+        tmp_file_object = File(open(tmp_file, "r"))
         carResults_certain.append({"image_path": os.path.join(settings.MEDIA_ROOT, image_path), "license_plate_message" : "no_car_in_image", "plateNum" : "N/A", "action" : "no_car_in_image"})
-        processed.objects.create(car=car.objects.get(licence_plate="N/A"), fine_amount=0, photo=data, fined=False)
+        #processed.objects.create(car=car.objects.get(licence_plate="N/A"), fine_amount=0, photo=request.FILES['file'], fined=False)
+        processed.objects.create(car=car.objects.get(licence_plate="N/A"), fine_amount=0, photo= "../media/" +image_path, fined=False)
         return JsonResponse(carResults_certain[0])
 
     # If there is a car in the image figure out if it needs a ticket:
