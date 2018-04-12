@@ -349,15 +349,19 @@ def parking(request):
 
 def ticketView(request):
     data = {}
-    data['tickets']= processed.objects.filter(fined=True).order_by('-id')
+    data['tickets']= processed.objects.filter(fined=True).filter(sent=False).order_by('-id')
     return render(request, "tickets.html", context=data)
 
 def processedView(request):
     data = {}
     # TODO (for JOHN): create add reson to view
     data['tickets']= processed.objects.filter(fined=False).order_by('-id')
-    data['cars']= car.objects.all()
     return render(request, "processed.html", context=data)
+
+def sentView(request):
+    data = {}
+    data['tickets']= processed.objects.filter(sent=True).order_by('-id')
+    return render(request, "sent.html", context=data)
 
 def photoview(request, pk = None):
     return HttpResponse(image.objects.get(pk=pk).photo, content_type="image/png")
@@ -371,6 +375,6 @@ def ticketRequest(request, pk = None):
         action ="ignored"
     elif int(request.GET.get('sent')):
         row.sent = True;
-        row.save()  
+        row.save()
         action="sent"
     return JsonResponse({"response":action})

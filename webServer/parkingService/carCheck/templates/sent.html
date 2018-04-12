@@ -4,6 +4,31 @@
 <!-- <script src="{%static 'bootstarp/js/bootstrap.min.js'%}"></script> -->
 <script src="{%static 'materialize/js/materialize.min.js'%}"></script>
 <script>
+function ignoreRow(pk){
+  url = '/ticketAction/'+pk;
+  $.ajax({
+      url: url ,
+      type: 'GET',
+      data:{'ignore':1}
+  }).done(function(data){
+  $('#'+pk).remove();
+  });
+}
+
+function sendRow(pk){
+    url = '/ticketAction/'+pk;
+    $.ajax({
+        url: url ,
+        type: 'GET',
+        data:{
+          'ignore':0,
+          'sent':1,
+        }
+    }).done(function(data){
+    $('#'+pk).remove();
+    });
+}
+
   $(function(){
     $('.modal').modal();
     $('.modal-trigger').click(function(){
@@ -34,16 +59,20 @@
               <th>ID</th>
               <th>Car</th>
               <th>Photo</th>
+              <th>Amount</th>
+              <th>Reason</th>
               <th>Date</th>
           </tr>
         </thead>
 
         <tbody class="white-text">
           {% for ticket in tickets %}
-          <tr>
+          <tr id="{{ ticket.pk }}">
             <td>{{ ticket.pk }}</td>
             <td>{{ ticket.car }}</td>
             <td><a class="waves-effect waves-light btn modal-trigger" id="/media/{{ ticket.photo }}" href="#modal1">Photo</a></td>
+            <td>${{ ticket.fine_amount}}</td>
+            <td>{{ ticket.reason}}</td>
             <td>{{ ticket.date}}</td>
           </tr>
           {% endfor %}

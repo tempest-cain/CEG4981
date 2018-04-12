@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^createaccount/', createAccount),
     url(r'^parking/', parking),
     url(r'^ticket/', ticketView),
+    url(r'^sent/', sentView),
     url(r'^uncertain/', uncertainView),
     url(r'^correct/(?P<pk>.*)$', uncertainRequest),
     url(r'^ticketAction/(?P<pk>.*)$', ticketRequest),
