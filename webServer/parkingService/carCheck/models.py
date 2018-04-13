@@ -7,6 +7,7 @@ class parking_pass(models.Model):
     pass_number = models.IntegerField(unique=True)
     expiration = models.DateField(default=datetime.datetime.now().date())
     owner = models.CharField(max_length=300) #would be student ID in real applicatoin
+    faculty = models.BooleanField(default = False)
 
 class car(models.Model):
     model = models.CharField(max_length = 100)
